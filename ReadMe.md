@@ -164,7 +164,7 @@ class User {
     final int id;
     str username;
     str surname;
-    int highest_score;
+    int highestScore;
     //геттеры, сеттеры
 }
 ```
