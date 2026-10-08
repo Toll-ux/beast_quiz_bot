@@ -207,7 +207,7 @@ class QuestionTest {
 
     @DisplayName("Проверка на правильность ответа на вход множество с индексом < 0")
     @Test
-    void testIsCorrectAnswerIndexNegative(){
+    void isCorrectAnswerIndexNegative(){
         IllegalArgumentException thrown = Assertions.assertThrows(IllegalArgumentException.class, () -> {
             qReference.isCorrectAnswer(Set.of(-12));
         });
