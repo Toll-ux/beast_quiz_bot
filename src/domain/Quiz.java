@@ -36,7 +36,7 @@ public class Quiz {
      * @throws IllegalArgumentException если список вопросов пустой
      * @throws NullPointerException если список null
      */
-    Quiz(List<Question> questions) {
+    public Quiz(List<Question> questions) {
         if (questions == null) throw new NullPointerException("Question list can not be null");
         if (questions.isEmpty()) throw new IllegalArgumentException("Question list is empty");
 
