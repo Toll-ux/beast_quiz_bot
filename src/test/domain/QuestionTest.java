@@ -1,6 +1,7 @@
 package domain;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 import java.util.ArrayList;
@@ -9,231 +10,226 @@ import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 class QuestionTest {
+    /**Референсные переменные*/
+    static final int id = 1;
+    static final String text = "2+2 = ?";
+    static final List<String> answers = List.of("1", "No", "14", "4");
+    static final Set<Integer> correctAnswerIndexes = Set.of(3);
+    static final Question qReference = new Question(id, text, answers, correctAnswerIndexes);
 
+    /**Переменные для проверки вопроса с одним ответом*/
+    static int idOne = 2;
+    static String textOne = "3+3 = ?";
+    static List<String> answersOne = List.of("6", "9", "4", "4");
+    static Set<Integer> correctAnswerIndexesOne = Set.of(0);
+    static Question questionWithOneAnswer = new Question(idOne, textOne, answersOne, correctAnswerIndexesOne);
 
+    /**Переменные для проверки вопроса с двумя ответами. Остальные случаи по индукции*/
+    static int idTwo = 3;
+    static String textTwo = "3*3 = ?";
+    static List<String> answersTwo = List.of("9", "No", "18/2", "4");
+    static Set<Integer> correctAnswerIndexesTwo = Set.of(0, 2);
+    static Question questionWithTwoAnswers = new Question(idTwo, textTwo, answersTwo, correctAnswerIndexesTwo);
+
+    @DisplayName("Работа конструктора")
     @Test
-    void  generalAccessPermission(){
-        int id = 1;
-        String question = "2+2 = ?";
-        List<String> answers = List.of("1", "No", "14", "4");
-        Set<Integer> correctAnswerIndexes = Set.of(3);
-        Question qt = new Question(id, question, answers, correctAnswerIndexes);
+    void generalAccessPermission(){
+        Question qt = new Question(id, text, answers, correctAnswerIndexes);
 
-        assertEquals(qt.id(), id);
-        assertEquals(qt.text(), question);
-        assertEquals(qt.answers(), answers);
-        assertEquals(qt.correctAnswerIndexes(), correctAnswerIndexes);
+        assertEquals(id, qt.id());
+        assertEquals(text, qt.text());
+        assertEquals(answers, qt.answers());
+        assertEquals(correctAnswerIndexes, qt.correctAnswerIndexes());
     }
 
-
+    @DisplayName("Конструктор получил id = 0")
     @Test
-    void testConstructorZeroId(){
-        int id = 0;
-        String question = "2+2 = ?";
-        List<String> answers = List.of("1", "No", "14", "4");
-        Set<Integer> correctAnswerIndexes = Set.of(3);
-
+    void constructorZeroId(){
         IllegalArgumentException thrown = Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            new Question(id, question, answers, correctAnswerIndexes);
+            new Question(0, text, answers, correctAnswerIndexes);
         });
 
         Assertions.assertEquals("Question id is must be positive", thrown.getMessage());
     }
 
+    @DisplayName("Конструктор получил отрицательный id")
     @Test
-    void testConstructorNegativeId(){
-        int id = -100;
-        String question = "2+2 = ?";
-        List<String> answers = List.of("1", "No", "14", "4");
-        Set<Integer> correctAnswerIndexes = Set.of(3);
-
+    void constructorNegativeId(){
         IllegalArgumentException thrown = Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            new Question(id, question, answers, correctAnswerIndexes);
+            new Question(-1000, text, answers, correctAnswerIndexes);
         });
 
         Assertions.assertEquals("Question id is must be positive", thrown.getMessage());
     }
 
+    @DisplayName("Конструктор получил пустую строку вопроса")
     @Test
-    void testConstructorNoQuestion(){
-        int id = 100;
-        String question = "";
-        List<String> answers = List.of("1", "No", "14", "4");
-        Set<Integer> correctAnswerIndexes = Set.of(3);
-
+    void constructorNoQuestion(){
         IllegalArgumentException thrown = Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            new Question(id, question, answers, correctAnswerIndexes);
+            new Question(id, "", answers, correctAnswerIndexes);
         });
 
         Assertions.assertEquals("Question text must not be blank", thrown.getMessage());
     }
 
+    @DisplayName("Конструктор получил null строку вопроса")
     @Test
-    void testConstructorNoAnswers(){
-        int id = 100;
-        String question = "2+2 = ?";
-        List<String> answers = List.of();
-        Set<Integer> correctAnswerIndexes = Set.of(3);
-
+    void constructorNullQuestion(){
         IllegalArgumentException thrown = Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            new Question(id, question, answers, correctAnswerIndexes);
+            new Question(id, null, answers, correctAnswerIndexes);
+        });
+
+        Assertions.assertEquals("Question text must not be blank", thrown.getMessage());
+    }
+
+    @DisplayName("Конструктор получил пустой список ответов")
+    @Test
+    void constructorNoAnswers(){
+        IllegalArgumentException thrown = Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            new Question(id, text, List.of(), correctAnswerIndexes);
         });
 
         Assertions.assertEquals("List of answers must not be empty", thrown.getMessage());
     }
 
+    @DisplayName("Конструктор получил null вместо списка ответов")
     @Test
-    void testConstructorNoCorrectAnswerIndexes(){
-        int id = 100;
-        String question = "2+2 = ?";
-        List<String> answers = List.of("1", "No", "14", "4");
-        Set<Integer> correctAnswerIndexes = Set.of();
-
+    void constructorNullAnswers(){
         IllegalArgumentException thrown = Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            new Question(id, question, answers, correctAnswerIndexes);
+            new Question(id, text, null, correctAnswerIndexes);
         });
 
-        Assertions.assertEquals("Sert of correctAnswerIndexes must not be empty", thrown.getMessage());
+        Assertions.assertEquals("List of answers must not be empty", thrown.getMessage());
     }
 
+    @DisplayName("Конструктор получил пустое множество правильных ответов")
     @Test
-    void testConstructorCorrectAnswerIndexesOutOfRange(){
-        int id = 100;
-        String question = "2+2 = ?";
-        List<String> answers = List.of("1", "No", "14", "4");
-        Set<Integer> correctAnswerIndexes = Set.of(4, 1, 2);
-
+    void constructorNoCorrectAnswerIndexes(){
         IllegalArgumentException thrown = Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            new Question(id, question, answers, correctAnswerIndexes);
+            new Question(id, text, answers, Set.of());
+        });
+
+        Assertions.assertEquals("Set of correctAnswerIndexes must not be empty", thrown.getMessage());
+    }
+
+    @DisplayName("Конструктор получил пустое null вместо множества правильных ответов")
+    @Test
+    void constructorNullCorrectAnswerIndexes(){
+        IllegalArgumentException thrown = Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            new Question(id, text, answers, null);
+        });
+
+        Assertions.assertEquals("Set of correctAnswerIndexes must not be empty", thrown.getMessage());
+    }
+
+    @DisplayName("Конструктор получил множество ответов, но есть индекс за пределами списка")
+    @Test
+    void constructorCorrectAnswerIndexesBiggerThanList(){
+        IllegalArgumentException thrown = Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            new Question(id, text, answers, Set.of(1, 2, 4));
+        });
+
+        Assertions.assertEquals("Correct answer indexes are out of range", thrown.getMessage());
+    }
+
+    @DisplayName("Конструктор получил множество ответов, но есть отрицательный индекс")
+    @Test
+    void constructorCorrectAnswerIndexesNegative(){
+        IllegalArgumentException thrown = Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            new Question(id, text, answers, Set.of(1, 2, -3));
+        });
+
+        Assertions.assertEquals("Correct answer indexes are out of range", thrown.getMessage());
+    }
+
+    @DisplayName("Множество индексов в классе постоянное, проверка изменением множества, которым инициализировался класс")
+    @Test
+    void initialisedCorrectAnswerIndexesChange() {
+        Set<Integer> changeableCorAnsIdx  = new CopyOnWriteArraySet<>(correctAnswerIndexes);
+        Question qt = new Question(id, text, answers, changeableCorAnsIdx);
+
+        changeableCorAnsIdx.clear();
+        assertEquals(correctAnswerIndexes, qt.correctAnswerIndexes());
+    }
+
+    @DisplayName("Множество индексов в классе постоянное, проверка изменением множества, которое получили по get запросу")
+    @Test
+    void getCorrectAnswerIndexesChange(){
+        Set<Integer> newCorrectAnswerIndexes = qReference.correctAnswerIndexes();
+        Assertions.assertThrows(UnsupportedOperationException.class, newCorrectAnswerIndexes::clear);
+    }
+
+    @DisplayName("Список ответов в классе постоянный, проверка изменением списка, которым инициализировался класс")
+    @Test
+    void initialisedAnswersChange(){
+        List<String> newAnswers = new ArrayList<>(answers);
+        Question qt = new Question(id, text, newAnswers, correctAnswerIndexes);
+        newAnswers.clear();
+        assertEquals(answers, qt.answers());
+    }
+
+    @DisplayName("Список индексов в классе постоянный, проверка изменением списка, который получили по get запросу")
+    @Test
+    void getAnswersChange(){
+        List<String> newAnswers = qReference.answers();
+        Assertions.assertThrows(UnsupportedOperationException.class, newAnswers::clear);
+    }
+
+    @DisplayName("Проверка на правильность ответа на вход пустое множество")
+    @Test
+    void isCorrectAnswerEmptyInput(){
+        IllegalArgumentException thrown = Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            qReference.isCorrectAnswer(Set.of());
+        });
+
+        Assertions.assertEquals("Set of ansIndexes must not be empty", thrown.getMessage());
+    }
+
+    @DisplayName("Проверка на правильность ответа  на вход null")
+    @Test
+    void isCorrectAnswerNull(){
+        IllegalArgumentException thrown = Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            qReference.isCorrectAnswer(null);
+        });
+
+        Assertions.assertEquals("Set of ansIndexes must not be empty", thrown.getMessage());
+    }
+
+    @DisplayName("Проверка на правильность ответа на вход множество с индексом > длины списка")
+    @Test
+    void isCorrectAnswerIndexBiggerThanListOfAnswers(){
+        IllegalArgumentException thrown = Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            qReference.isCorrectAnswer(Set.of(answers.size() + 2));
+        });
+
+        Assertions.assertEquals("Correct answer index is out of range", thrown.getMessage());
+    }
+
+    @DisplayName("Проверка на правильность ответа на вход множество с индексом < 0")
+    @Test
+    void testIsCorrectAnswerIndexNegative(){
+        IllegalArgumentException thrown = Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            qReference.isCorrectAnswer(Set.of(-12));
         });
 
         Assertions.assertEquals("Correct answer index is out of range", thrown.getMessage());
     }
 
 
+    @DisplayName("Проверка на правильность ответа для set 1 элемент, неправильный ответ, частично правильный ответ")
     @Test
-    void constructorNullSafety(){
-        int id = 100;
-        String question = "2+2 = ?";
-        List<String> answers = List.of("1", "No", "14", "4");
-        Set<Integer> correctAnswerIndexes = Set.of(4, 1, 2);
-
-        assertThrows(
-                IllegalArgumentException.class,
-                () -> new Question(id, null, answers, correctAnswerIndexes)
-        );
-
-        assertThrows(
-                IllegalArgumentException.class,
-                () -> new Question(id, question, null, correctAnswerIndexes)
-        );
-
-        assertThrows(
-                IllegalArgumentException.class,
-                () -> new Question(id, question, answers, null)
-        );
+    void isCorrectAnswerOneRightAnswers(){
+        assertTrue(questionWithOneAnswer.isCorrectAnswer(correctAnswerIndexesOne));
+        assertFalse(questionWithOneAnswer.isCorrectAnswer(correctAnswerIndexesTwo));
+        assertFalse(questionWithOneAnswer.isCorrectAnswer(correctAnswerIndexes));
     }
 
+    @DisplayName("Проверка на правильность ответа для set 2 элемента, неправильный ответ, частично правильный ответ")
     @Test
-    void correctAnswerIndex() {
-        int id = 100;
-        String question = "2+2 = ?";
-        List<String> answers = List.of("1", "No", "14", "4");
-        Set<Integer> correctAnswerIndexes = new CopyOnWriteArraySet<>(Set.of(0, 1, 2));
-
-        Question qt = new Question(id, question, answers, correctAnswerIndexes);
-
-
-        correctAnswerIndexes.clear();
-        assertEquals(Set.of(0, 1, 2), qt.correctAnswerIndexes());
-
-        Set<Integer> newCorrectAnswerIndexes = qt.correctAnswerIndexes();
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> newCorrectAnswerIndexes.clear());
-
+    void isCorrectAnswerTwoRightAnswers(){
+        assertTrue(questionWithTwoAnswers.isCorrectAnswer(correctAnswerIndexesTwo));
+        assertFalse(questionWithTwoAnswers.isCorrectAnswer(correctAnswerIndexesOne));
+        assertFalse(questionWithTwoAnswers.isCorrectAnswer(correctAnswerIndexes));
     }
 
-    @Test
-    void answers(){
-        int id = 100;
-        String question = "2+2 = ?";
-        List<String> answers = new ArrayList<>(List.of("1", "No", "14", "4"));
-        Set<Integer> correctAnswerIndexes = Set.of(0, 1, 2);
-
-        Question qt = new Question(id, question, answers, correctAnswerIndexes);
-
-
-        answers.clear();
-        assertEquals(List.of("1", "No", "14", "4"), qt.answers());
-
-        List<String> newAnswers = qt.answers();
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> newAnswers.clear());
-    }
-
-    @Test
-    void testIsCorrectAnswerEmptyInput(){
-        int id = 100;
-        String question = "2+2 = ?";
-        List<String> answers = List.of("1", "No", "14", "4");
-        Set<Integer> correctAnswerIndexes = Set.of(3);
-
-        Question qt = new Question(id, question, answers, correctAnswerIndexes);
-
-        IllegalArgumentException thrown = Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            qt.isCorrectAnswer(Set.of());
-        });
-
-        Assertions.assertEquals("Sert of ansIndexes must not be empty", thrown.getMessage());
-    }
-
-    @Test
-    void testIsCorrectAnswerIndexOutOfRange(){
-        int id = 100;
-        String question = "2+2 = ?";
-        List<String> answers = List.of("1", "No", "14", "4");
-        Set<Integer> correctAnswerIndexes = Set.of(3);
-
-        Question qt = new Question(id, question, answers, correctAnswerIndexes);
-
-        IllegalArgumentException thrown = Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            qt.isCorrectAnswer(Set.of(100));
-        });
-
-        Assertions.assertEquals("Correct answer index is out of range", thrown.getMessage());
-    }
-
-    @Test
-    void testIsCorrectAnswerOneRightAnswers(){
-        int id = 100;
-        String question = "2+2 = ?";
-        List<String> answers = List.of("1", "No", "14", "4");
-        Set<Integer> correctAnswerIndexes = Set.of(3);
-
-        Question qt = new Question(id, question, answers, correctAnswerIndexes);
-
-        assertEquals(true, qt.isCorrectAnswer(correctAnswerIndexes));
-    }
-
-    @Test
-    void testIsCorrectAnswerSomeRightAnswers(){
-        int id = 100;
-        String question = "2+2 = ?";
-        List<String> answers = List.of("4/1", "8/2", "4.0 + 0", "4");
-        Set<Integer> correctAnswerIndexes = Set.of(0,1,2,3);
-
-        Question qt = new Question(id, question, answers, correctAnswerIndexes);
-
-        assertEquals(true, qt.isCorrectAnswer(correctAnswerIndexes));
-    }
-
-    @Test
-    void testIsCorrectAnswerWrongAnswers(){
-        int id = 100;
-        String question = "2+2 = ?";
-        List<String> answers = List.of("1", "No", "14", "4");
-        Set<Integer> correctAnswerIndexes = Set.of(3);
-
-        Question qt = new Question(id, question, answers, correctAnswerIndexes);
-
-        assertEquals(false, qt.isCorrectAnswer(Set.of(0)));
-    }
 }
