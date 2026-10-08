@@ -36,6 +36,7 @@ public class Quiz {
      * @throws IllegalArgumentException если список вопросов пустой
      */
     Quiz(List<Question> questions) {
+        if (questions == null) throw new NullPointerException("Question list can not be null");
         if (questions.isEmpty()) throw new IllegalArgumentException("Question list is empty");
 
         this.questions = List.copyOf(questions);
@@ -95,12 +96,20 @@ public class Quiz {
      * @return класс с правильным ответом и данными ответами
      */
     public AnswerResult submitAnswer(Set<Integer> selectedAnswers) {
+        if (selectedAnswers == null)
+            throw new NullPointerException("Selected Answers can not be null");
+
         if (selectedAnswers.isEmpty())
             throw new IllegalArgumentException("Selected answers must not be Empty");
 
-        if (status != QuizStatus.IN_PROGRESS) {
+        if (status != QuizStatus.IN_PROGRESS)
             throw new IllegalStateException("Quiz is not in progress");
-        }
+
+
+        if (currentQuestionIndex > questions.size())
+            throw new ArrayIndexOutOfBoundsException(
+                    String.format("Question Index is out of range: %d > %d",currentQuestionIndex, questions.size()));
+
 
         Question question = questions.get(currentQuestionIndex);
 
@@ -134,4 +143,22 @@ public class Quiz {
 
         currentQuestionIndex++;
     }
+
+    /**Функции показывающие состояние квиза, нужны для отладки*/
+    public boolean isStarted(){
+        return status == QuizStatus.IN_PROGRESS;
+    }
+
+    public boolean isFinished(){
+        return status == QuizStatus.FINISHED;
+    }
+
+    public boolean isAborted(){
+        return status == QuizStatus.ABORTED;
+    }
+
+    public boolean isDoingNothing(){
+        return status == QuizStatus.NOT_STARTED;
+    }
+
 }
