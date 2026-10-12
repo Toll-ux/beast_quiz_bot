@@ -12,19 +12,19 @@ public class HardcodedUserRepository implements UserRepository {
     private final Map<Long, User> users = new HashMap<>();
 
     /** Возвращает Юзера из словаря по его tg ID
-     * @param telegramId - tg id юзера
+     * @param telegramId - tg ID юзера
      * @return User, если пользователь с таким tg id есть в словаре,
      * ничего, если его нет.
      */
     @Override
     public Optional<User> findUserByTelegramId(long telegramId) {
-        if (users.containsKey(telegramId))
-        {
-            return Optional.of(users.get);
-        }
+        return Optional.ofNullable(users.get(telegramId));
     }
 
-    /// Отправляет данные Юзера в БД
+    /** Сохраняет данные юзера в словарь, новые данные заменяют старые, если
+     * юзер с таким tg ID уже существует
+     * @throws IllegalArgumentException если user == null
+     */
     @Override
     public void saveUserInfo(User user) {
         if (user == null) {
