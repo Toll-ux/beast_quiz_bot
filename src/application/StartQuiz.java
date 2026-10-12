@@ -5,18 +5,21 @@ import application.port.QuizRepository;
 import domain.Question;
 import domain.Quiz;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.time.Clock;
+import java.time.LocalDateTime;
 
-/** StartQuiz - отвечает за шаги (1) - (3) ReadMe (стартует сессию, получает вопросы для квиза)
+/**
+ * 
+ * StartQuiz - отвечает за шаги (1) - (3) ReadMe (стартует сессию, получает вопросы для квиза)
+ * @param questionRepository - интерфейс репозитория вопросов
+ * @param quizRepository - интерфейс репозитория квизов
+ * @param clock - 
  */
 
 public class StartQuiz
 {
-    /**questionRepository - интерфейс репозитория вопросов*/
     private final QuestionRepository questionRepository;
-    /**quizRepository - интерфейс репозитория квизов*/
     private final QuizRepository quizRepository;
     private final Clock clock;
 
@@ -30,7 +33,7 @@ public class StartQuiz
      * 
      * @param telegramId - id юзера
      * @param questionsCount - количество вопросов
-     * @return id сессии и количество найденных вопросов
+     * @return id сессии, обзор первого вопроса и количество найденных вопросов
      */
     public StartQuizResult execute(long telegramId, int questionsCount)
     {
@@ -55,7 +58,9 @@ public class StartQuiz
 
         // сохраняем сессию
         quizRepository.saveQuizSession(quizSession);
-        return new StartQuizResult(sessionId, questions.size());
+
+        QuestionView firstQuestionView = QuestionView.from(quiz.getQuestions().get(quiz.getCurrentQuestionIndex()));
+        return new StartQuizResult(sessionId, firstQuestionView, questions.size());
     }
     /**
      * 
@@ -64,6 +69,6 @@ public class StartQuiz
      */
     public int generateSessionId()
     {
-        return (int) (System.currentTimeMillis() % Integer.MAX_VALUE);
+        return (int) (clock.millis() % Integer.MAX_VALUE);
     }
 }

@@ -1,11 +1,9 @@
 package application.port;
 
 import domain.Question;
-import domain.Quiz;
-import domain.User;
 
 import java.util.List;
-import java.util.Optional;
+
 
 /*
 Интерфейсы для работы с бекендом в application, их имплементация в infrastructure 
