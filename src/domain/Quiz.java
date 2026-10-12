@@ -34,8 +34,10 @@ public class Quiz {
      * @param questions список подготовленных вопросов
      *
      * @throws IllegalArgumentException если список вопросов пустой
+     * @throws NullPointerException если список null
      */
     public Quiz(List<Question> questions) {
+        if (questions == null) throw new NullPointerException("Question list can not be null");
         if (questions.isEmpty()) throw new IllegalArgumentException("Question list is empty");
 
         this.questions = List.copyOf(questions);
@@ -79,6 +81,10 @@ public class Quiz {
         status = QuizStatus.FINISHED;
     }
 
+
+    /**Функция меняет статус квиза с IN_PROGRESS на ABORTED
+     * @throws IllegalStateException если квиз не в IN_PROGRESS
+     */
     public void abort(){
         if (status != QuizStatus.IN_PROGRESS)
             throw new IllegalStateException("Quiz is not in progress");
@@ -92,15 +98,25 @@ public class Quiz {
      *
      * @param selectedAnswers индексы в списке вопросов
      * @throws IllegalStateException если статус квиза не IN_PROGRESS
+     * @throws NullPointerException если переданный ответ null
+     * @throws IllegalArgumentException если переданный ответ пустой
      * @return класс с правильным ответом и данными ответами
      */
     public AnswerResult submitAnswer(Set<Integer> selectedAnswers) {
+        if (selectedAnswers == null)
+            throw new NullPointerException("Selected Answers can not be null");
+
         if (selectedAnswers.isEmpty())
             throw new IllegalArgumentException("Selected answers must not be Empty");
 
-        if (status != QuizStatus.IN_PROGRESS) {
+        if (status != QuizStatus.IN_PROGRESS)
             throw new IllegalStateException("Quiz is not in progress");
-        }
+
+
+        if (currentQuestionIndex > questions.size())
+            throw new ArrayIndexOutOfBoundsException(
+                    String.format("Question Index is out of range: %d > %d",currentQuestionIndex, questions.size()));
+
 
         Question question = questions.get(currentQuestionIndex);
 
@@ -125,6 +141,7 @@ public class Quiz {
     /**Функция инкрементирует индекс в массиве вопросов
      * @throws IllegalStateException если статус квиза не IN_PROGRESS
      *
+     *@see submitAnswer WARNING решен, но надо иметь это ввиду
      * WARNING: инкрементирует, даже если массив закончился, возможен выход за границы массива
      */
     public void nextQuestion() {
@@ -134,4 +151,22 @@ public class Quiz {
 
         currentQuestionIndex++;
     }
+
+    /**Функции показывающие состояние квиза, нужны для отладки*/
+    public boolean isStarted(){
+        return status == QuizStatus.IN_PROGRESS;
+    }
+
+    public boolean isFinished(){
+        return status == QuizStatus.FINISHED;
+    }
+
+    public boolean isAborted(){
+        return status == QuizStatus.ABORTED;
+    }
+
+    public boolean isDoingNothing(){
+        return status == QuizStatus.NOT_STARTED;
+    }
+
 }

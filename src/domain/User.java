@@ -12,9 +12,11 @@ public class User {
     public final int id;
     /**Идентификатор тг: 10 значное число или меньше, уникальное для любого пользователя и бота*/
     public final long telegramId;
-    /**Имя пользователя (имя с @)*/
+    /**Имя пользователя (имя с @)
+     *  может быть null*/
     private String username;
-    /**Ник пользователя (без @)*/
+    /**Ник пользователя (без @)
+     * Может быть null*/
     private String nickname;
     /**Счет за все партии*/
     private int totalScore;
@@ -24,7 +26,8 @@ public class User {
     /** Перегруженный конструктор создает объект и проверяет корректность telegramId и id.
      * Можно на этих полях или на всех
      *
-     * @throws IllegalArgumentException если id или telegramId неверные
+     * @throws IllegalArgumentException если id, telegramId, или счет неверные
+     * @throws NullPointerException если username или nickname null
      */
     public User(int id, long telegramId) {
         this(id, telegramId, "", "", 0);
@@ -34,9 +37,10 @@ public class User {
     public User(int id, long telegramId, String username, String nickname, int totalScore) {
         if (id <= 0) throw new IllegalArgumentException("User id must be positive");
         if (telegramId <= 0) throw new IllegalArgumentException("Telegram id must be positive");
-        if (totalScore < 0) {
+        if (totalScore < 0)
             throw new IllegalArgumentException("Score cannot be negative");
-        }
+        if (username == null) throw new IllegalArgumentException("Username must not be null");
+        if (nickname == null) throw new IllegalArgumentException("Nickname must not be null");
 
         this.id = id;
         this.telegramId = telegramId;
@@ -83,7 +87,31 @@ public class User {
         this.totalScore = Math.max(this.totalScore, score);
     }
 
+    /**Функция делает юзера админом. Без проверок
+     * @throws IllegalStateException если уже админ
+     */
+    public void becomeAdmin(){
+        if (permissions == UserPermissions.ADMIN)
+            throw new IllegalStateException("User already admin");
+
+        permissions = UserPermissions.ADMIN;
+    }
+
+    /**Функция делает юзера обычным пользователем
+     * @throws IllegalStateException если уже NORMAL_PLAYER
+     */
+    public void becomeNormalUser(){
+        if (permissions == UserPermissions.NORMAL_PLAYER)
+            throw new IllegalStateException("User already normal user");
+
+        permissions = UserPermissions.NORMAL_PLAYER;
+    }
+
     public boolean isUserAdmin(){
-        return UserPermissions.ADMIN == permissions;
+        return permissions == UserPermissions.ADMIN;
+    }
+
+    public boolean isUserNormalPlayer(){
+        return permissions == UserPermissions.NORMAL_PLAYER;
     }
 }
