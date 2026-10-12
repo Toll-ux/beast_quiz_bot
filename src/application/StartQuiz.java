@@ -5,20 +5,18 @@ import application.port.QuizRepository;
 import domain.Question;
 import domain.Quiz;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.time.Clock;
 
-/**
- * 
- * StartQuiz - отвечает за шаги (1) - (3) ReadMe (стартует сессию, получает вопросы для квиза)
- * @param questionRepository - интерфейс репозитория вопросов
- * @param quizRepository - интерфейс репозитория квизов
- * @param clock - 
+/** StartQuiz - отвечает за шаги (1) - (3) ReadMe (стартует сессию, получает вопросы для квиза)
  */
 
 public class StartQuiz
 {
+    /**questionRepository - интерфейс репозитория вопросов*/
     private final QuestionRepository questionRepository;
+    /**quizRepository - интерфейс репозитория квизов*/
     private final QuizRepository quizRepository;
     private final Clock clock;
 
