@@ -17,14 +17,86 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.Optional;
+import java.util.Map;
+import java.util.HashMap;
 
-import infrastructure.FakeQuestionRepo;
-import infrastructure.FakeQuizRepo;
+class FakeQuizRepo implements QuizRepository {
 
-/**Тесты на
- * 3) поведение при сбоях инфраструктуры.
- */
+    private final Map<Long, QuizSession> quizSessions = new HashMap<>();
 
+    @Override
+    public void saveQuizSession(QuizSession quizSession) {
+        if (quizSession == null) {
+            throw new IllegalArgumentException("QuizSession cannot be null");
+        }
+        quizSessions.put(quizSession.telegramId(), quizSession);
+    }
+
+    @Override
+    public void updateQuizSession(QuizSession quizSession) {
+        if (quizSession == null) {
+            throw new IllegalArgumentException("QuizSession cannot be null");
+        }
+        if (!quizSessions.containsKey(quizSession.telegramId())) {
+            throw new IllegalArgumentException("QuizSession does not exist");
+        }
+        quizSessions.put(quizSession.telegramId(), quizSession);
+    }
+
+    @Override
+    public Optional<QuizSession> findQuizSessionByTelegramId(long telegramId) {
+        if (telegramId <= 0) {
+            throw new IllegalArgumentException("Telegram id must be positive");
+        }
+        return Optional.ofNullable(quizSessions.get(telegramId));
+    }
+
+    /**
+     * Специальный метод для юнит-тестов.
+     * Позволяет проверить, сколько всего сессий сейчас находится в репозитории.
+     */
+    public int getSessionsCount() {
+        return quizSessions.size();
+    }
+
+    /**
+     * Специальный метод для юнит-тестов.
+     * Позволяет получить прямой доступ к карте сессий для глубоких проверок.
+     */
+    public Map<Long, QuizSession> getQuizSessions() {
+        return quizSessions;
+    }
+}
+
+class FakeQuestionRepo implements QuestionRepository {
+
+    public final List<Question> questions = List.of(
+            new Question(1, "Сколько планет в Солнечной системе?", List.of("7", "8", "9", "10"), Set.of(1)));
+
+    public boolean isOutputNull = false;
+    public boolean isOutputEmpty = false;
+
+    @Override
+    public List<Question> findRandomQuestions(int questionsCount) {
+        if (isOutputNull) return null;
+        if (isOutputEmpty) return List.of();
+
+        if (questionsCount <= 0 )
+        {
+            throw new IllegalArgumentException("QuestionCount must be positive");
+        }
+        if (questionsCount > questions.size())
+        {
+            throw new IllegalArgumentException("More questions were requested than are available");
+        }
+
+        List<Question> shuffledQuestions = new ArrayList<>(questions);
+        //Возвращаем независимый список, а не представление части исходного
+        return new ArrayList<>(
+                shuffledQuestions.subList(0, questionsCount)
+        );
+    }
+}
 
 
 
