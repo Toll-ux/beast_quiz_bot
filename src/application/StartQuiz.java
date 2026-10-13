@@ -37,13 +37,18 @@ public class StartQuiz
      */
     public StartQuizResult execute(long telegramId, int questionsCount)
     {
+        if (telegramId <= 0)
+            throw new IllegalArgumentException("Telegram id must be positive");
+
+
+
         if (questionsCount <=0)
         {
             throw new IllegalArgumentException("questionCount must be positive");            
         }
         // ищем вопросы
         List<Question> questions = questionRepository.findRandomQuestions(questionsCount);
-        if (questions.isEmpty()) {
+        if (questions == null || questions.isEmpty()) {
             throw new IllegalStateException("question list is empty");
         }
 
