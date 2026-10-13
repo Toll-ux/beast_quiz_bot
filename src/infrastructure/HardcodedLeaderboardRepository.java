@@ -19,7 +19,7 @@ public class HardcodedLeaderboardRepository implements LeaderboardRepository {
      * @throws IllegalArgumentException если telegramId <= 0 или score < 0
      */
     @Override
-    public void updateHighScore(long telegramId, int score) {
+    public void saveUserTotalScore(long telegramId, int score) {
         if (telegramId <= 0) {
             throw new IllegalArgumentException("Telegram id must be positive");
         }

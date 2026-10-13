@@ -84,11 +84,11 @@ public class FinishQuiz
             .orElseThrow(() -> new IllegalStateException("User not found"));
         
         // Сохраняем данные об очках юзера в userRepository
-        user.updateTotalScore(score);
+        user.updateTotalScore(score + user.getTotalScore());
         userRepository.saveUserInfo(user);
 
         // Сохраняем данные об очках за квиз в leaderboardRepository
-        leaderboardRepository.updateHighScore(user.telegramId, user.getTotalScore());
+        leaderboardRepository.saveUserTotalScore(user.telegramId, user.getTotalScore());
 
         return new FinishQuizResult(
             session.sessionId(),

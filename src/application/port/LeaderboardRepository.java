@@ -13,7 +13,7 @@ import java.util.List;
 public interface LeaderboardRepository
 {
     /** Ничего не возвращает. Сохраняет данные о набранных юзером очков в течение целого квиза */
-    void updateHighScore(long telegramId, int score);
+    void saveUserTotalScore(long telegramId, int score);
 
     /** Возвращает первые 10 игроков
      * @return список игроков по порядку 0 = 1-ый и тд.
