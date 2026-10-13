@@ -20,9 +20,9 @@ public class HardcodedQuizRepository implements QuizRepository{
     @Override
     public void saveQuizSession(QuizSession quizSession){
         if (quizSession == null) {
-            throw new IllegalArgumentException("quizSession cannot be null");
+            throw new IllegalArgumentException("QuizSession cannot be null");
         }
-        quizSessions.put(quizSession.getTelegramId(), quizSession);
+        quizSessions.put(quizSession.telegramId(), quizSession);
     }
 
     /** Сохраняет данные о текущей или завершенной сессии в поле quizSessions
@@ -31,13 +31,13 @@ public class HardcodedQuizRepository implements QuizRepository{
     @Override
     public void updateQuizSession(QuizSession quizSession){
         if (quizSession == null) {
-            throw new IllegalArgumentException("quizSession cannot be null");
+            throw new IllegalArgumentException("QuizSession cannot be null");
         }
-        if (!quizSessions.containsKey(quizSession.getTelegramId())){
-            throw new IllegalArgumentException("quizSession does not exist");
+        if (!quizSessions.containsKey(quizSession.telegramId())){
+            throw new IllegalArgumentException("QuizSession does not exist");
         }
 
-        quizSessions.put(quizSession.getTelegramId(), quizSession);
+        quizSessions.put(quizSession.telegramId(), quizSession);
     }
 
     /** Возвращает текущую квиз-сессию юзера (их <=1 для каждого юзера) по тг id юзера
@@ -47,6 +47,9 @@ public class HardcodedQuizRepository implements QuizRepository{
      */
     @Override
     public Optional<QuizSession> findQuizSessionByTelegramId(long telegramId){
+        if (telegramId <= 0) {
+            throw new IllegalArgumentException("Telegram id must be positive");
+        }
         return Optional.ofNullable(quizSessions.get(telegramId));
     }
 }

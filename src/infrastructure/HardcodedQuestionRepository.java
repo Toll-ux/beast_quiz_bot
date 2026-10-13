@@ -10,7 +10,7 @@ import java.util.Set;
 
 public class HardcodedQuestionRepository implements QuestionRepository{
 
-    // id вопросов должны не повторяться.
+    // id вопросов должны не повторяться
     private final List<Question> questions = List.of(
             new Question(
                     1,
@@ -49,11 +49,11 @@ public class HardcodedQuestionRepository implements QuestionRepository{
     public List<Question> findRandomQuestions(int questionsCount){
         if (questionsCount <= 0 )
         {
-            throw new IllegalArgumentException("questionCount must be positive");
+            throw new IllegalArgumentException("QuestionCount must be positive");
         }
         if (questionsCount > questions.size())
         {
-            throw new IllegalArgumentException("more questions were requested than are available");
+            throw new IllegalArgumentException("More questions were requested than are available");
         }
 
         List<Question> shuffledQuestions = new ArrayList<>(questions);

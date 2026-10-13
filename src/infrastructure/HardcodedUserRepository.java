@@ -18,6 +18,9 @@ public class HardcodedUserRepository implements UserRepository {
      */
     @Override
     public Optional<User> findUserByTelegramId(long telegramId) {
+        if (telegramId <= 0) {
+            throw new IllegalArgumentException("Telegram id must be positive");
+        }
         return Optional.ofNullable(users.get(telegramId));
     }
 
