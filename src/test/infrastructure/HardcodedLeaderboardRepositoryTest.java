@@ -10,10 +10,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class HardcodedLeaderboardRepositoryTest {
 
-    static final int id = 1;
     static final long tgId = 123333;
-    static final String username = "@qwer";
-    static final String nickname = "alex123";
     static final int totalScore = 123;
 
     @DisplayName("Сохранение нового рекорда пользователя")
