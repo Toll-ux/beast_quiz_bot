@@ -33,7 +33,7 @@ public class LeaderBoard {
         if (topTen.isEmpty())
             throw new IllegalStateException("Leaderboard data is missing or database is empty");
         // кусок у юзера
-        List<LeaderboardEntry> usersSlice = leaderboardRepository.findUserAbdCloset(quizSession.telegramId());
+        List<LeaderboardEntry> usersSlice = leaderboardRepository.findUserAndClosest(quizSession.telegramId());
         // не пустой ли он
         if (usersSlice.isEmpty())
             throw new IllegalStateException("User slice data is missing or database is empty");

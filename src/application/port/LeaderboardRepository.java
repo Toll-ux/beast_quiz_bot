@@ -23,5 +23,5 @@ public interface LeaderboardRepository
     /**Возвращает список игроков от 1 до 3
      * @return игрок 0, первый над юзером, 1 юзер, 2 первый после юзера
      */
-    List<LeaderboardEntry> findUserAbdCloset(long telegramId);
+    List<LeaderboardEntry> findUserAndClosest(long telegramId);
 }
