@@ -58,7 +58,7 @@ public class HardcodedLeaderboardRepository implements LeaderboardRepository {
      * @throws IllegalArgumentException если telegramId <= 0
      */
     @Override
-    public List<LeaderboardEntry> findUserAbdCloset(long telegramId) {
+    public List<LeaderboardEntry> findUserAndClosest(long telegramId) {
         if (telegramId <= 0) {
             throw new IllegalArgumentException("Telegram id must be positive");
         }

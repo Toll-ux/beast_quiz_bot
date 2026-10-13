@@ -26,14 +26,14 @@ public class LeaderBoard {
     /**Функция берет топ 10 игроков из лидерборда и 1 игрок выше юзера, юзера и 1 ниже юзера.
      * Их комбинирует и возвращает отсортированный список
      */
-    public  List<LeaderboardEntry> execute(){
+    public  List<LeaderboardEntry> getUsersPosition(){
         // топ 10
         List<LeaderboardEntry> topTen = leaderboardRepository.findTopTen();
         // не пустой ли он
         if (topTen.isEmpty())
             throw new IllegalStateException("Leaderboard data is missing or database is empty");
         // кусок у юзера
-        List<LeaderboardEntry> usersSlice = leaderboardRepository.findUserAbdCloset(quizSession.telegramId());
+        List<LeaderboardEntry> usersSlice = leaderboardRepository.findUserAndClosest(quizSession.telegramId());
         // не пустой ли он
         if (usersSlice.isEmpty())
             throw new IllegalStateException("User slice data is missing or database is empty");
