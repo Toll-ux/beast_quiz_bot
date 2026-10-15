@@ -1,23 +1,33 @@
 package application.port;
 
+import application.LeaderboardEntry;
 import domain.User;
+
+import java.util.List;
 import java.util.Optional;
 
-/*
-Интерфейсы для работы с бекендом в application, их имплементация в infrastructure 
-*/
 
-/*
-Application - интерфейс работы с БД юзеров
-*/
+/**Application - интерфейс работы с БД юзеров, в том числе и leaderboard
+ * Интерфейсы для работы с бекендом в application, их имплементация в infrastructure
+ */
 public interface UserRepository
 {
-    /*
-    Возвращает Юзера из БД по его тгИД
-    */
+    /**Возвращает Юзера из БД по его тгИД*/
     Optional<User> findUserByTelegramId(long telegramId);
-    /*
-    Отправляет данные Юзера в БД
-    */
+
+    /**Отправляет данные Юзера в БД*/
     void saveUserInfo(User user);
+
+    /** Ничего не возвращает. Сохраняет данные о набранных юзером очков в течение целого квиза */
+    void updateHighScore(long telegramId, int score);
+
+    /** Возвращает первые 10 игроков
+     * @return список игроков по порядку 0 = 1-ый и тд.
+     */
+    List<LeaderboardEntry> findTopTen();
+
+    /**Возвращает список игроков от 1 до 3
+     * @return игрок 0, первый над юзером, 1 юзер, 2 первый после юзера
+     */
+    List<LeaderboardEntry> findUserAndClosest(long telegramId);
 }

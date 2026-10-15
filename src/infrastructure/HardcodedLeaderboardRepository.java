@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 public class HardcodedLeaderboardRepository implements LeaderboardRepository {
-    /// Ключи -  telegram ID пользователей.
+    /// Ключи - telegram ID пользователей.
     /// Для каждого пользователя хранится его totalScore.
     private final Map<Long, Integer> scores = new HashMap<>();
 

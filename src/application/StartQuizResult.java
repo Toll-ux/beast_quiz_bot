@@ -4,7 +4,7 @@ package application;
  * 
  * StartQuizResult - результат начала квиза 
  * @param sessionId - id новой квиз-сессии
- * @param firstQuestionView - обзор первого вопроса
  * @param questionsCount - количество вопросов в новом квизе
+ * @param firstQuestionView - первый вопрос
  */
-public record StartQuizResult(int sessionId, QuestionView firstQuestionView, int questionsCount) {}
+public record StartQuizResult(int sessionId, int questionsCount, QuestionView firstQuestionView) {}
