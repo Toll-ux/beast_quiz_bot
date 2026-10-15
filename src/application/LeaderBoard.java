@@ -11,16 +11,16 @@ import java.util.Set;
 public class LeaderBoard {
 
     private final QuizSession quizSession;
-    private final LeaderboardRepository leaderboardRepository;
+    private final UserRepository userRepository;
 
     /**Конструктор класса
      *
      * @param quizSession сессия квиза
-     * @param leaderboardRepository инфраструктура для лидерборда
+     * @param userRepository инфраструктура для лидерборда
      */
-    public LeaderBoard(QuizSession quizSession, LeaderboardRepository leaderboardRepository){
+    public LeaderBoard(QuizSession quizSession, UserRepository userRepository){
         this.quizSession = quizSession;
-        this.leaderboardRepository = leaderboardRepository;
+        this.userRepository = userRepository;
     }
 
     /**Функция берет топ 10 игроков из лидерборда и 1 игрок выше юзера, юзера и 1 ниже юзера.
@@ -28,12 +28,12 @@ public class LeaderBoard {
      */
     public  List<LeaderboardEntry> getUsersPosition(){
         // топ 10
-        List<LeaderboardEntry> topTen = leaderboardRepository.findTopTen();
+        List<LeaderboardEntry> topTen = userRepository.findTopTen();
         // не пустой ли он
         if (topTen.isEmpty())
             throw new IllegalStateException("Leaderboard data is missing or database is empty");
         // кусок у юзера
-        List<LeaderboardEntry> usersSlice = leaderboardRepository.findUserAndClosest(quizSession.telegramId());
+        List<LeaderboardEntry> usersSlice = userRepository.findUserAndClosest(quizSession.telegramId());
         // не пустой ли он
         if (usersSlice.isEmpty())
             throw new IllegalStateException("User slice data is missing or database is empty");

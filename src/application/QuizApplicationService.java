@@ -23,13 +23,12 @@ public class QuizApplicationService
         QuestionRepository questionRepository,
         QuizRepository quizRepository,
         UserRepository userRepository,
-        LeaderboardRepository leaderboardRepository,
         Clock clock
     ) {
         
         this.startQuiz = new StartQuiz(questionRepository, quizRepository, clock);
         this.answerQuestion = new AnswerQuestion(quizRepository);
-        this.finishQuiz = new FinishQuiz(quizRepository, userRepository, leaderboardRepository);
+        this.finishQuiz = new FinishQuiz(quizRepository, userRepository);
     }
 
     /* Метод, начинающий квиз */

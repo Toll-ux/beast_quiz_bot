@@ -2,7 +2,6 @@ package application;
 
 import application.port.QuizRepository;
 import application.port.UserRepository;
-import application.port.LeaderboardRepository;
 import domain.Quiz;
 import domain.User;
 
@@ -11,14 +10,11 @@ public class FinishQuiz
     /* Интерфейс репозиториев, в которых хранятся данные о квизах, юзерах и о лидерборде*/
     private final QuizRepository quizRepository;
     private final UserRepository userRepository;
-    private final LeaderboardRepository leaderboardRepository;
     /* Конструктор объекта FinishQuiz по конкретным интерфейсам репозиториев */
     public FinishQuiz(QuizRepository quizRepository,
-        UserRepository userRepository,
-        LeaderboardRepository leaderboardRepository) 
+        UserRepository userRepository)
     {
         this.quizRepository = quizRepository;
-        this.leaderboardRepository = leaderboardRepository;
         this.userRepository = userRepository;
     }
 
@@ -88,7 +84,7 @@ public class FinishQuiz
         userRepository.saveUserInfo(user);
 
         // Сохраняем данные об очках за квиз в leaderboardRepository
-        leaderboardRepository.updateHighScore(user.telegramId, user.getTotalScore());
+        userRepository.updateHighScore(user.telegramId, user.getTotalScore());
 
         return new FinishQuizResult(
             session.sessionId(),
