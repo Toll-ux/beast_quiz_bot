@@ -2,90 +2,20 @@ package application;
 
 import application.port.*;
 import domain.*;
-import infrastructure.*;
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.util.Set;
 import java.util.Optional;
-import java.util.Map;
-import java.util.HashMap;
 
-class FakeQuestionRepo4AnswerQuestions implements QuestionRepository {
-
-    public final List<Question> questions = List.of(
-            new Question(1, "Сколько планет в Солнечной системе?", List.of("7", "8", "9", "10"), Set.of(1)),
-            new Question(2, "Какой тип данных хранит целые числа в Java?", List.of("String", "int", "boolean", "double"), Set.of(1)));
-
-    public boolean isOutputNull = false;
-    public boolean isOutputEmpty = false;
-
-    @Override
-    public List<Question> findRandomQuestions(int questionsCount) {
-        if (questionsCount <= 0) {
-            throw new IllegalArgumentException("QuestionCount must be positive");
-        }
-        if (isOutputNull) return null;
-        if (isOutputEmpty) return List.of();
-
-        if (questionsCount > questions.size()) {
-            throw new IllegalArgumentException("More questions were requested than are available");
-        }
-
-        List<Question> shuffledQuestions = new ArrayList<>(questions);
-        return new ArrayList<>(shuffledQuestions.subList(0, questionsCount));
-    }
-}
-
-class FakeQuizRepo4AnswerQuestions implements QuizRepository {
-
-    public boolean getEmptyForTelegramId = false;
-
-    private final Map<Long, QuizSession> quizSessions = new HashMap<>();
-
-    @Override
-    public void saveQuizSession(QuizSession quizSession) {
-        if (quizSession == null) {
-            throw new IllegalArgumentException("QuizSession cannot be null");
-        }
-        quizSessions.put(quizSession.telegramId(), quizSession);
-    }
-
-    @Override
-    public void updateQuizSession(QuizSession quizSession) {
-        if (quizSession == null) {
-            throw new IllegalArgumentException("QuizSession cannot be null");
-        }
-        if (!quizSessions.containsKey(quizSession.telegramId())) {
-            throw new IllegalArgumentException("QuizSession does not exist");
-        }
-        quizSessions.put(quizSession.telegramId(), quizSession);
-    }
-
-    // ИСПРАВЛЕНО: Добавлен недостающий метод для поиска сессии, чтобы удовлетворить интерфейс QuizRepository
-    @Override
-    public Optional<QuizSession> findQuizSessionByTelegramId(long telegramId) {
-        if (getEmptyForTelegramId)
-            return Optional.empty();
-
-        if (telegramId <= 0) {
-            throw new IllegalArgumentException("Telegram id must be positive");
-        }
-        return Optional.ofNullable(quizSessions.get(telegramId));
-    }
-}
 
 public class AnswerQuestionTest {
-
-    // Используем интерфейсы для полиморфизма
-    final QuestionRepository generalQuestionRepo = new FakeQuestionRepo4AnswerQuestions();
-    final QuizRepository generalQuizRepo = new FakeQuizRepo4AnswerQuestions();
+    
+    final FakeQuestionRepo generalQuestionRepo = new FakeQuestionRepo();
+    final FakeQuizRepo generalQuizRepo = new FakeQuizRepo();
 
     final Clock clock = Clock.fixed(
             Instant.parse("2026-10-14T12:15:00Z"),
@@ -104,8 +34,8 @@ public class AnswerQuestionTest {
     @DisplayName("execute: пользователь дал верный ответ")
     @Test
     void execute(){
-        FakeQuestionRepo4AnswerQuestions questionRepoCurrent = new FakeQuestionRepo4AnswerQuestions();
-        FakeQuizRepo4AnswerQuestions quizRepoCurrent = new FakeQuizRepo4AnswerQuestions();
+        FakeQuestionRepo questionRepoCurrent = new FakeQuestionRepo();
+        FakeQuizRepo quizRepoCurrent = new FakeQuizRepo();
 
         StartQuiz sq = new StartQuiz(questionRepoCurrent, quizRepoCurrent, clock);
         sq.execute(telegramId, questionsCount);
@@ -128,8 +58,8 @@ public class AnswerQuestionTest {
     @DisplayName("execute: пользователь дал неверный ответ")
     @Test
     void executeWithIncorrectAnswer(){
-        FakeQuestionRepo4AnswerQuestions questionRepoCurrent = new FakeQuestionRepo4AnswerQuestions();
-        FakeQuizRepo4AnswerQuestions quizRepoCurrent = new FakeQuizRepo4AnswerQuestions();
+        FakeQuestionRepo questionRepoCurrent = new FakeQuestionRepo();
+        FakeQuizRepo quizRepoCurrent = new FakeQuizRepo();
 
         StartQuiz sq = new StartQuiz(questionRepoCurrent, quizRepoCurrent, clock);
         sq.execute(telegramId, questionsCount);
@@ -156,7 +86,7 @@ public class AnswerQuestionTest {
     @DisplayName("execute: нет активного квиза")
     @Test
     void executeNoActiveQuiz(){
-        FakeQuizRepo4AnswerQuestions quizRepoCurrent = new FakeQuizRepo4AnswerQuestions();
+        FakeQuizRepo quizRepoCurrent = new FakeQuizRepo();
 
         AnswerQuestion aq = new AnswerQuestion(quizRepoCurrent);
 
@@ -173,7 +103,7 @@ public class AnswerQuestionTest {
     @DisplayName("execute: для tg id Optional возвращает Empty")
     @Test
     void executeEmptyGetAfterTgId(){
-        FakeQuizRepo4AnswerQuestions quizRepoCurrent = new FakeQuizRepo4AnswerQuestions();
+        FakeQuizRepo quizRepoCurrent = new FakeQuizRepo();
         quizRepoCurrent.getEmptyForTelegramId = true;
         AnswerQuestion aq = new AnswerQuestion(quizRepoCurrent);
 
@@ -188,8 +118,8 @@ public class AnswerQuestionTest {
     @DisplayName("execute: ответ не на тот вопрос (нарушение последовательности)")
     @Test
     void executeWithWrongQuestionIdThrowsException() {
-        FakeQuestionRepo4AnswerQuestions questionRepoCurrent = new FakeQuestionRepo4AnswerQuestions();
-        FakeQuizRepo4AnswerQuestions quizRepoCurrent = new FakeQuizRepo4AnswerQuestions();
+        FakeQuestionRepo questionRepoCurrent = new FakeQuestionRepo();
+        FakeQuizRepo quizRepoCurrent = new FakeQuizRepo();
 
         StartQuiz sq = new StartQuiz(questionRepoCurrent, quizRepoCurrent, clock);
         sq.execute(telegramId, questionsCount);
