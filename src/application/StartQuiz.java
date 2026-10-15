@@ -9,18 +9,14 @@ import java.util.List;
 import java.time.Clock;
 import java.time.LocalDateTime;
 
-/**
- * 
- * StartQuiz - отвечает за шаги (1) - (3) ReadMe (стартует сессию, получает вопросы для квиза)
- * @param questionRepository - интерфейс репозитория вопросов
- * @param quizRepository - интерфейс репозитория квизов
- * @param clock - 
- */
-
+/**StartQuiz - отвечает за шаги (1) - (3) ReadMe (стартует сессию, получает вопросы для квиза)*/
 public class StartQuiz
 {
+    /**questionRepository - интерфейс репозитория вопросов*/
     private final QuestionRepository questionRepository;
+    /**quizRepository - интерфейс репозитория квизов*/
     private final QuizRepository quizRepository;
+    /**clock - часы*/
     private final Clock clock;
 
     public StartQuiz(QuestionRepository questionRepository, QuizRepository quizRepository, Clock clock)
@@ -58,9 +54,7 @@ public class StartQuiz
 
         // сохраняем сессию
         quizRepository.saveQuizSession(quizSession);
-
-        QuestionView firstQuestionView = QuestionView.from(quiz.getQuestions().get(quiz.getCurrentQuestionIndex()));
-        return new StartQuizResult(sessionId, firstQuestionView, questions.size());
+        return new StartQuizResult(sessionId, questions.size());
     }
     /**
      * 
