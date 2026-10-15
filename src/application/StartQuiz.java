@@ -26,7 +26,7 @@ public class StartQuiz
         this.clock = clock;
     }
     /**
-     * 
+     *
      * @param telegramId - id юзера
      * @param questionsCount - количество вопросов
      * @return id сессии, обзор первого вопроса и количество найденных вопросов
@@ -35,7 +35,7 @@ public class StartQuiz
     {
         if (questionsCount <=0)
         {
-            throw new IllegalArgumentException("questionCount must be positive");            
+            throw new IllegalArgumentException("questionCount must be positive");
         }
         // ищем вопросы
         List<Question> questions = questionRepository.findRandomQuestions(questionsCount);
@@ -54,10 +54,12 @@ public class StartQuiz
 
         // сохраняем сессию
         quizRepository.saveQuizSession(quizSession);
-        return new StartQuizResult(sessionId, questions.size());
+
+        QuestionView firstQuestionView = QuestionView.from(quiz.getQuestions().getFirst());
+        return new StartQuizResult(sessionId, questions.size(), firstQuestionView);
     }
     /**
-     * 
+     *
      * @return ид сессии
      * само по себе ид сессии не уникально, образует ключ (для поиска QuizSession) только в паре с telegramId
      */
