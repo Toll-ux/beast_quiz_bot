@@ -1,5 +1,6 @@
 import application.AnswerQuestionResult;
 import application.FinishQuizResult;
+import application.QuestionView;
 import application.QuizApplicationService;
 import application.StartQuizResult;
 import application.port.LeaderboardRepository;
@@ -20,7 +21,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 
-public class TestRun 
+public class TestRun
 {
     public static void main(String[] args)
     {
@@ -35,37 +36,39 @@ public class TestRun
         QuizApplicationService QAS = new QuizApplicationService(questionRepository, quizRepository, userRepository, leaderboardRepository,  clock);
 
         Scanner scanner = new Scanner(System.in);
-        IO.println(String.format("Hello and welcome to our Quiz-bot!"));
-        IO.println(String.format("Please enter the desired quiz length (currently support 1-4 questions): "));
+        IO.println("Hello and welcome to our Quiz-bot!");
+        IO.println("Please enter the desired quiz length (currently support 1-4 questions): ");
 
         int questionCount = scanner.nextInt();
-        scanner.nextLine(); 
+        scanner.nextLine();
         if ((questionCount > 4) || (questionCount < 1)){
-            IO.println(String.format("Come on, bro... let's assume you want 4 questions..."));
+            IO.println("Come on, bro... let's assume you want 4 questions...");
             questionCount = 4;
         }
 
-        StartQuizResult startRes = QAS.start(1, questionCount);
+        StartQuizResult startResult = QAS.start(1, questionCount);
+        QuestionView currentQuestionView = startResult.firstQuestionView();
 
-        String questionText = startRes.firstQuestionView().text();
-        IO.println(questionText);
+        while (true){
+            IO.println(currentQuestionView.text());
 
-        List<String> answers = startRes.firstQuestionView().answers();
-        for (int i = 0; i < answers.size(); i++) {
-            System.out.println((i + 1) + ": " + answers.get(i));
-        }
-        IO.println(String.format("Please enter numbers representing your answer (possibly multiple choice) in one single line"));
-        String line = scanner.nextLine();
+            List<String> answers = currentQuestionView.answers();
+            for (int i = 0; i < answers.size(); i++) {
+                System.out.println((i + 1) + ": " + answers.get(i));
+            }
 
-        Set<Integer> numbers = Arrays.stream(line.trim().split("\\s+"))
-            .map(Integer::parseInt).map(n -> n - 1) 
-            .collect(Collectors.toSet());
 
-        int questionId = startRes.firstQuestionView().questionId();
+            IO.println("Please enter numbers representing your answer (possibly multiple choice) in one single line");
+            String line = scanner.nextLine();
 
-        AnswerQuestionResult result;
-        do {
-            result = QAS.answer(1, questionId, numbers);
+            Set<Integer> numbers = Arrays.stream(line.trim().split("\\s+"))
+                    .map(Integer::parseInt).map(n -> n - 1)
+                    .collect(Collectors.toSet());
+
+
+            int questionId = currentQuestionView.questionId();
+
+            AnswerQuestionResult result = QAS.answer(1, questionId, numbers);
 
             if(result.correct()){
                 IO.println("Good job, you answered correctly!");
@@ -75,27 +78,11 @@ public class TestRun
             }
 
             if(result.finished()){
-                continue;
+                break;
             }
 
-            result.nextQuestionView();
-
-            questionText = result.nextQuestionView().text();
-            IO.println(questionText);
-
-            answers = result.nextQuestionView().answers();
-            for (int i = 0; i < answers.size(); i++) {
-                System.out.println((i + 1) + ": " + answers.get(i));
-            }
-            IO.println(String.format("Please enter numbers representing your answer (possibly multiple choice) in one single line"));
-            line = scanner.nextLine();
-
-            numbers = Arrays.stream(line.trim().split("\\s+"))
-                .map(Integer::parseInt).map(n -> n - 1)
-                .collect(Collectors.toSet());
-
-            questionId = result.nextQuestionView().questionId();
-        } while (!result.finished());
+            currentQuestionView = result.nextQuestionView();
+        }
         FinishQuizResult finishedQuiz = QAS.finish(1);
         IO.println("Nicely done! Your total score was: " + finishedQuiz.quizScore());
     }
