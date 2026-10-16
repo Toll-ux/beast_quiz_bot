@@ -70,6 +70,6 @@ public class StartQuiz
      */
     public int generateSessionId()
     {
-        return (int) (clock.millis() % Integer.MAX_VALUE);
+        return (int) ((clock.millis() % Integer.MAX_VALUE) & 0x7FFFFFFF);
     }
 }

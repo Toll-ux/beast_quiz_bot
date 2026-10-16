@@ -20,30 +20,47 @@ public class StartQuizTest {
     );
 
     final long telegramId = 20;
-    int questionsCount = 1;
+    int questionsCount = 2;
 
 
-    @DisplayName("Инициализация класса StartQuiz")
+    @DisplayName("StartQuiz: инициализация класса StartQuiz")
     @Test
     void startQuisConstructor(){
-        assertDoesNotThrow(() -> { new StartQuiz( questionRepo, quizRepo, clock);});
+        assertDoesNotThrow(() -> { new StartQuiz(questionRepo, quizRepo, clock);});
     }
 
-    @DisplayName("execute нормальная работа")
+    @DisplayName("generateSessionId: обычная работа")
+    @Test
+    void generateSessionIdNormal(){
+        StartQuiz sq = new StartQuiz(questionRepo, quizRepo, clock);
+        int id = (int) ((clock.millis() % Integer.MAX_VALUE) & 0x7FFFFFFF);
+        assertEquals(id, sq.generateSessionId());
+        assertEquals(id, sq.execute(telegramId, questionsCount).sessionId());
+    }
+
+    @DisplayName("generateSessionId: переполнение Long")
+    @Test
+    void generateSessionId(){
+        Clock badClock = Clock.fixed(Instant.ofEpochMilli(Long.MAX_VALUE + 1), ZoneId.systemDefault());
+        StartQuiz sq = new StartQuiz(questionRepo, quizRepo, badClock);
+
+        assertTrue(sq.generateSessionId() > 0);
+    }
+
+    @DisplayName("execute: нормальная работа")
     @Test
     void execute(){
-        FakeQuestionRepo questionRepoCurrent = new FakeQuestionRepo();
-        StartQuiz sq = new StartQuiz(questionRepoCurrent, quizRepo, clock);
+        StartQuiz sq = new StartQuiz(questionRepo, quizRepo, clock);
         StartQuizResult result = sq.execute(telegramId, questionsCount);
 
+        assertEquals(sq.generateSessionId(),result.sessionId());
         assertEquals(questionsCount, result.questionsCount());
-        Question expectedQuestion = questionRepoCurrent.questions.getFirst();
+        Question expectedQuestion = questionRepo.questions.getFirst();
         QuestionView expectedView = QuestionView.from(expectedQuestion);
         assertEquals(expectedView, result.firstQuestionView());
-        assertEquals(sq.generateSessionId(),result.sessionId());
     }
 
-    @DisplayName("execute передали 0 вопросов")
+    @DisplayName("execute: передали 0 вопросов")
     @Test
     void executeZeroQuestionCount(){
         StartQuiz sq = new StartQuiz(questionRepo, quizRepo, clock);
@@ -55,7 +72,7 @@ public class StartQuizTest {
         assertEquals("questionCount must be positive", thrown.getMessage());
     }
 
-    @DisplayName("execute передали отрицательное количество вопросов")
+    @DisplayName("execute: передали отрицательное количество вопросов")
     @Test
     void executeNegativeQuestionCount(){
         StartQuiz sq = new StartQuiz(questionRepo, quizRepo, clock);
@@ -67,7 +84,7 @@ public class StartQuizTest {
         assertEquals("questionCount must be positive", thrown.getMessage());
     }
 
-    @DisplayName("execute передали 0 tg id")
+    @DisplayName("execute: передали 0 tg id")
     @Test
     void executeZeroTgId(){
         StartQuiz sq = new StartQuiz(questionRepo, quizRepo, clock);
@@ -79,7 +96,7 @@ public class StartQuizTest {
         assertEquals("Telegram id must be positive", thrown.getMessage());
     }
 
-    @DisplayName("execute передали отрицательный tg id")
+    @DisplayName("execute: передали отрицательный tg id")
     @Test
     void executeNegativeTgId(){
         StartQuiz sq = new StartQuiz(questionRepo, quizRepo, clock);
@@ -91,12 +108,11 @@ public class StartQuizTest {
         assertEquals("Telegram id must be positive", thrown.getMessage());
     }
 
-    @DisplayName("execute вопросов в базе данных нет")
+    @DisplayName("execute: принял от бд пустой список")
     @Test
     void executeNoQuestionInBD(){
-        FakeQuestionRepo questionRepoCurrent = new FakeQuestionRepo();
-        questionRepoCurrent.isOutputEmpty = true;
-        StartQuiz sq = new StartQuiz(questionRepoCurrent, quizRepo, clock);
+        questionRepo.isOutputEmpty = true;
+        StartQuiz sq = new StartQuiz(questionRepo, quizRepo, clock);
 
         IllegalStateException thrown = assertThrows(IllegalStateException.class, () -> {
             StartQuizResult result = sq.execute(telegramId, questionsCount);
@@ -105,12 +121,11 @@ public class StartQuizTest {
         assertEquals("question list is empty", thrown.getMessage());
     }
 
-    @DisplayName("execute принял от бд null")
+    @DisplayName("execute: принял от бд null")
     @Test
     void executeNullFromBD(){
-        FakeQuestionRepo questionRepoCurrent = new FakeQuestionRepo();
-        questionRepoCurrent.isOutputNull = true;
-        StartQuiz sq = new StartQuiz(questionRepoCurrent, quizRepo, clock);
+        questionRepo.isOutputNull = true;
+        StartQuiz sq = new StartQuiz(questionRepo, quizRepo, clock);
 
         IllegalStateException thrown = assertThrows(IllegalStateException.class, () -> {
             StartQuizResult result = sq.execute(telegramId, questionsCount);
@@ -119,16 +134,13 @@ public class StartQuizTest {
         assertEquals("question list is empty", thrown.getMessage());
     }
 
-    @DisplayName("execute успешно сохраняет сессию в репозиторий квизов")
+    @DisplayName("execute: успешно сохраняет сессию в репозиторий квизов")
     @Test
     void executeSavesSessionCorrectly() {
-        FakeQuestionRepo questionRepoCurrent = new FakeQuestionRepo();
-        FakeQuizRepo quizRepoCurrent = new FakeQuizRepo();
-
-        StartQuiz sq = new StartQuiz(questionRepoCurrent, quizRepoCurrent, clock);
+        StartQuiz sq = new StartQuiz(questionRepo, quizRepo, clock);
         StartQuizResult result = sq.execute(telegramId, questionsCount);
 
-        Optional<QuizSession> savedSessionOpt = quizRepoCurrent.findQuizSessionByTelegramId(telegramId);
+        Optional<QuizSession> savedSessionOpt = quizRepo.findQuizSessionByTelegramId(telegramId);
         assertTrue(savedSessionOpt.isPresent(), "Сессия должна быть сохранена в репозитории!");
 
         QuizSession savedSession = savedSessionOpt.get();
@@ -137,17 +149,14 @@ public class StartQuizTest {
     }
 
 
-    @DisplayName("execute 2 раза перезаписывает юзера")
+    @DisplayName("execute: 2 раза перезаписывает юзера")
     @Test
     void executeSavesSessionTwoTimes() {
-        FakeQuestionRepo questionRepoCurrent = new FakeQuestionRepo();
-        FakeQuizRepo quizRepoCurrent = new FakeQuizRepo();
-
-        StartQuiz sq = new StartQuiz(questionRepoCurrent, quizRepoCurrent, clock);
+        StartQuiz sq = new StartQuiz(questionRepo, quizRepo, clock);
 
         StartQuizResult result1 = sq.execute(telegramId, questionsCount);
 
-        Optional<QuizSession> savedSessionOpt1 = quizRepoCurrent.findQuizSessionByTelegramId(telegramId);
+        Optional<QuizSession> savedSessionOpt1 = quizRepo.findQuizSessionByTelegramId(telegramId);
         assertTrue(savedSessionOpt1.isPresent(), "Первая сессия должна быть сохранена в репозитории");
 
         QuizSession session1 = savedSessionOpt1.get();
@@ -156,14 +165,13 @@ public class StartQuizTest {
 
         StartQuizResult result2 = sq.execute(telegramId, questionsCount);
 
-        Optional<QuizSession> savedSessionOpt2 = quizRepoCurrent.findQuizSessionByTelegramId(telegramId);
+        Optional<QuizSession> savedSessionOpt2 = quizRepo.findQuizSessionByTelegramId(telegramId);
         assertTrue(savedSessionOpt2.isPresent(), "Вторая сессия должна успешно перезаписать первую");
 
         QuizSession session2 = savedSessionOpt2.get();
         assertEquals(result2.sessionId(), session2.sessionId());
         assertEquals(telegramId, session2.telegramId());
 
-        assertEquals(1, quizRepoCurrent.getSessionsCount(), "Старая сессия должна была удалиться при перезаписи!");
+        assertEquals(1, quizRepo.getSessionsCount(), "Старая сессия должна была удалиться при перезаписи!");
     }
-
 }

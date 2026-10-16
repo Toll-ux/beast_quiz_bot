@@ -10,7 +10,10 @@ import java.util.Set;
 public class FakeQuestionRepo implements QuestionRepository {
 
     public final List<Question> questions = List.of(
-            new Question(1, "Сколько планет в Солнечной системе?", List.of("7", "8", "9", "10"), Set.of(1)));
+            new Question(1, "Сколько планет в Солнечной системе?", List.of("7", "8", "9", "10"), Set.of(1)),
+            new Question(2, "Было 3 козла. Сколько?", List.of("1", "3", "Числа Каталана", "> 0"), Set.of(0, 2, 3)),
+            new Question(3, "Если то; То Почему?", List.of("123", "WQE", "Durka"), Set.of(2))
+    );
 
     public boolean isOutputNull = false;
     public boolean isOutputEmpty = false;
@@ -28,11 +31,14 @@ public class FakeQuestionRepo implements QuestionRepository {
         {
             throw new IllegalArgumentException("More questions were requested than are available");
         }
-
-        List<Question> shuffledQuestions = new ArrayList<>(questions);
         //Возвращаем независимый список, а не представление части исходного
-        return new ArrayList<>(
-                shuffledQuestions.subList(0, questionsCount)
-        );
+        return new ArrayList<>(questions.subList(0, questionsCount));
+    }
+
+    public Set<Integer> getAnswer(int questionId){
+        return questions.stream().filter(q -> q.id() ==  questionId)
+                .findFirst()
+                .map(Question::correctAnswerIndexes)
+                .orElse(Set.of());
     }
 }

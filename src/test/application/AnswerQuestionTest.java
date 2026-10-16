@@ -3,6 +3,8 @@ package application;
 import application.port.*;
 import domain.*;
 import static org.junit.jupiter.api.Assertions.*;
+
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import java.time.Clock;
@@ -14,8 +16,8 @@ import java.util.Optional;
 
 public class AnswerQuestionTest {
     
-    final FakeQuestionRepo generalQuestionRepo = new FakeQuestionRepo();
-    final FakeQuizRepo generalQuizRepo = new FakeQuizRepo();
+    final FakeQuestionRepo questionRepo = new FakeQuestionRepo();
+    final FakeQuizRepo quizRepo = new FakeQuizRepo();
 
     final Clock clock = Clock.fixed(
             Instant.parse("2026-10-14T12:15:00Z"),
@@ -24,23 +26,100 @@ public class AnswerQuestionTest {
 
     final long telegramId = 20;
     final int questionsCount = 1;
+    final int questionId = 0;
+    final Set<Integer> selectedAnswers = Set.of(1);
 
     @DisplayName("Инициализация класса AnswerQuestion")
     @Test
     void answerQuestion(){
-        assertDoesNotThrow(() -> { new AnswerQuestion(generalQuizRepo); });
+        assertDoesNotThrow(() -> { new AnswerQuestion(quizRepo); });
+    }
+
+    @DisplayName("execute: получил tg id = 0")
+    @Test
+    void executeZeroTgId(){
+        AnswerQuestion aq = new AnswerQuestion(quizRepo);
+        IllegalArgumentException thrown = Assertions.assertThrows(IllegalArgumentException.class, () ->
+                aq.execute(0, questionId, selectedAnswers));
+
+        Assertions.assertEquals("Telegram id must be positive", thrown.getMessage());
+
+    }
+
+    @DisplayName("execute: получил tg id < 0")
+    @Test
+    void executeNegativeTgId(){
+        AnswerQuestion aq = new AnswerQuestion(quizRepo);
+        IllegalArgumentException thrown = Assertions.assertThrows(IllegalArgumentException.class, () ->
+                aq.execute(-100, questionId, selectedAnswers));
+
+        Assertions.assertEquals("Telegram id must be positive", thrown.getMessage());
+
+    }
+
+    @DisplayName("execute: получил question id = 0")
+    @Test
+    void executeZeroQuestionId(){
+        StartQuiz sq = new StartQuiz(questionRepo, quizRepo, clock);
+        sq.execute(telegramId, questionsCount);
+
+        AnswerQuestion aq = new AnswerQuestion(quizRepo);
+        IllegalArgumentException thrown = Assertions.assertThrows(IllegalArgumentException.class, () ->
+                aq.execute(telegramId, 0, selectedAnswers));
+
+        Assertions.assertEquals("Question id must be positive", thrown.getMessage());
+
+    }
+
+    @DisplayName("execute: получил question id < 0")
+    @Test
+    void executeNegativeQuestionId(){
+        StartQuiz sq = new StartQuiz(questionRepo, quizRepo, clock);
+        sq.execute(telegramId, questionsCount);
+
+        AnswerQuestion aq = new AnswerQuestion(quizRepo);
+        IllegalArgumentException thrown = Assertions.assertThrows(IllegalArgumentException.class, () ->
+                aq.execute(telegramId, -100, selectedAnswers));
+
+        Assertions.assertEquals("Question id must be positive", thrown.getMessage());
+
+    }
+
+    @DisplayName("execute: получил в selected answers пустое множество")
+    @Test
+    void executeEmptySelectedAnswers(){
+        StartQuiz sq = new StartQuiz(questionRepo, quizRepo, clock);
+        sq.execute(telegramId, questionsCount);
+
+        AnswerQuestion aq = new AnswerQuestion(quizRepo);
+        IllegalArgumentException thrown = Assertions.assertThrows(IllegalArgumentException.class, () ->
+                aq.execute(telegramId, questionId, Set.of()));
+
+        Assertions.assertEquals("selectedAnswers must not be Empty", thrown.getMessage());
+
+    }
+
+    @DisplayName("execute: получил selected answers null")
+    @Test
+    void executeNullSelectedAnswers(){
+        StartQuiz sq = new StartQuiz(questionRepo, quizRepo, clock);
+        sq.execute(telegramId, questionsCount);
+
+        AnswerQuestion aq = new AnswerQuestion(quizRepo);
+        IllegalArgumentException thrown = Assertions.assertThrows(IllegalArgumentException.class, () ->
+                aq.execute(telegramId, questionId, null));
+
+        Assertions.assertEquals("selectedAnswers must not be Empty", thrown.getMessage());
+
     }
 
     @DisplayName("execute: пользователь дал верный ответ")
     @Test
     void execute(){
-        FakeQuestionRepo questionRepoCurrent = new FakeQuestionRepo();
-        FakeQuizRepo quizRepoCurrent = new FakeQuizRepo();
-
-        StartQuiz sq = new StartQuiz(questionRepoCurrent, quizRepoCurrent, clock);
+        StartQuiz sq = new StartQuiz(questionRepo, quizRepo, clock);
         sq.execute(telegramId, questionsCount);
 
-        AnswerQuestion aq = new AnswerQuestion(quizRepoCurrent);
+        AnswerQuestion aq = new AnswerQuestion(quizRepo);
         AnswerQuestionResult aqRes = aq.execute(telegramId, 1, Set.of(1));
 
 
@@ -50,7 +129,7 @@ public class AnswerQuestionTest {
         assertTrue(aqRes.finished(), "Квиз должен быть завершен, так как это был последний вопрос");
         assertNull(aqRes.nextQuestionView(), "NextQuestionView должен быть null для финального вопроса");
 
-        Optional<QuizSession> updatedSessionOpt = quizRepoCurrent.findQuizSessionByTelegramId(telegramId);
+        Optional<QuizSession> updatedSessionOpt = quizRepo.findQuizSessionByTelegramId(telegramId);
         assertTrue(updatedSessionOpt.isPresent());
         assertEquals(aqRes.currentScore(), updatedSessionOpt.get().quiz().getScore());
     }
@@ -58,13 +137,10 @@ public class AnswerQuestionTest {
     @DisplayName("execute: пользователь дал неверный ответ")
     @Test
     void executeWithIncorrectAnswer(){
-        FakeQuestionRepo questionRepoCurrent = new FakeQuestionRepo();
-        FakeQuizRepo quizRepoCurrent = new FakeQuizRepo();
-
-        StartQuiz sq = new StartQuiz(questionRepoCurrent, quizRepoCurrent, clock);
+        StartQuiz sq = new StartQuiz(questionRepo, quizRepo, clock);
         sq.execute(telegramId, questionsCount);
 
-        AnswerQuestion aq = new AnswerQuestion(quizRepoCurrent);
+        AnswerQuestion aq = new AnswerQuestion(quizRepo);
         AnswerQuestionResult aqRes = aq.execute(telegramId, 1, Set.of(3));
 
         assertFalse(aqRes.correct(), "Ответ должен быть неверным");
@@ -77,39 +153,31 @@ public class AnswerQuestionTest {
         assertTrue(aqRes.finished(), "Квиз должен быть завершен, даже если ответ неверный");
         assertNull(aqRes.nextQuestionView(), "Следующего вопроса быть не должно");
 
-        Optional<QuizSession> updatedSessionOpt = quizRepoCurrent.findQuizSessionByTelegramId(telegramId);
+        Optional<QuizSession> updatedSessionOpt = quizRepo.findQuizSessionByTelegramId(telegramId);
         assertTrue(updatedSessionOpt.isPresent());
         assertEquals(0, updatedSessionOpt.get().quiz().getScore(), "В базе данных у квиза должно быть 0 очков");
     }
 
-
     @DisplayName("execute: нет активного квиза")
     @Test
     void executeNoActiveQuiz(){
-        FakeQuizRepo quizRepoCurrent = new FakeQuizRepo();
+        AnswerQuestion aq = new AnswerQuestion(quizRepo);
 
-        AnswerQuestion aq = new AnswerQuestion(quizRepoCurrent);
-
-        IllegalStateException thrown = assertThrows(IllegalStateException.class, () -> {
-            aq.execute(telegramId, 1, Set.of(3));
-        });
-
+        IllegalStateException thrown = assertThrows(IllegalStateException.class, () -> aq.execute(
+                telegramId, 1, Set.of(3)));
 
         String expectedMessage = "No active quiz for user with tg id: " + telegramId;
         assertEquals(expectedMessage, thrown.getMessage());
     }
 
-
     @DisplayName("execute: для tg id Optional возвращает Empty")
     @Test
     void executeEmptyGetAfterTgId(){
-        FakeQuizRepo quizRepoCurrent = new FakeQuizRepo();
-        quizRepoCurrent.getEmptyForTelegramId = true;
-        AnswerQuestion aq = new AnswerQuestion(quizRepoCurrent);
+        quizRepo.getEmptyForTelegramId = true;
+        AnswerQuestion aq = new AnswerQuestion(quizRepo);
 
-        IllegalStateException thrown = assertThrows(IllegalStateException.class, () -> {
-            aq.execute(telegramId, 1, Set.of(3));
-        });
+        IllegalStateException thrown = assertThrows(IllegalStateException.class, () ->
+                aq.execute(telegramId, 1, Set.of(3)));
 
         String expectedMessage = "No active quiz for user with tg id: " + telegramId;
         assertEquals(expectedMessage, thrown.getMessage());
@@ -118,27 +186,48 @@ public class AnswerQuestionTest {
     @DisplayName("execute: ответ не на тот вопрос (нарушение последовательности)")
     @Test
     void executeWithWrongQuestionIdThrowsException() {
-        FakeQuestionRepo questionRepoCurrent = new FakeQuestionRepo();
-        FakeQuizRepo quizRepoCurrent = new FakeQuizRepo();
-
-        StartQuiz sq = new StartQuiz(questionRepoCurrent, quizRepoCurrent, clock);
+        StartQuiz sq = new StartQuiz(questionRepo, quizRepo, clock);
         sq.execute(telegramId, questionsCount);
+        AnswerQuestion aq = new AnswerQuestion(quizRepo);
 
-
-        int scoreBefore = quizRepoCurrent.findQuizSessionByTelegramId(telegramId).orElseThrow().quiz().getScore();
-
-        AnswerQuestion aq = new AnswerQuestion(quizRepoCurrent);
-
-        IllegalStateException thrown = assertThrows(IllegalStateException.class, () -> {
-            aq.execute(telegramId, 2, Set.of(1));
-        });
+        IllegalStateException thrown = assertThrows(IllegalStateException.class, () ->
+                aq.execute(telegramId, 2, Set.of(1)));
 
         String expectedMessage = "Answered the wrong question. Expected 1, got 2";
         assertEquals(expectedMessage, thrown.getMessage());
 
-        QuizSession sessionAfter = quizRepoCurrent.findQuizSessionByTelegramId(telegramId).orElseThrow();
+        QuizSession sessionAfter = quizRepo.findQuizSessionByTelegramId(telegramId).orElseThrow();
         assertEquals(0, sessionAfter.quiz().getScore(), "Счет не должен измениться при ошибке ID вопроса");
         assertEquals(0, sessionAfter.quiz().getCurrentQuestionIndex(), "Индекс вопроса не должен сдвинуться");
     }
 
+    @DisplayName("execute: пользователь дал верный ответ 3 вопроса")
+    @Test
+    void executeTreeQuestions(){
+        StartQuiz sq = new StartQuiz(questionRepo, quizRepo, clock);
+        sq.execute(telegramId, 3);
+
+        AnswerQuestion aq = new AnswerQuestion(quizRepo);
+
+        for (int i = 1; i <= 3; i++) {
+            Set<Integer> rightAns = questionRepo.getAnswer(i);
+            AnswerQuestionResult aqRes = aq.execute(telegramId, i, rightAns);
+
+
+            assertTrue(aqRes.correct(), "Ответ должен быть верным");
+            assertEquals(rightAns, aqRes.correctAnswers());
+            assertTrue(aqRes.currentScore() > 0, "Очки за правильный ответ должны быть больше 0");
+
+
+            Optional<QuizSession> updatedSessionOpt = quizRepo.findQuizSessionByTelegramId(telegramId);
+            assertTrue(updatedSessionOpt.isPresent());
+            assertEquals(aqRes.currentScore(), updatedSessionOpt.get().quiz().getScore());
+
+            if (i == 3) {
+                assertNull(aqRes.nextQuestionView(), "NextQuestionView должен быть null для финального вопроса");
+                assertTrue(aqRes.finished(), "Квиз должен быть завершен, так как это был последний вопрос");
+
+            }
+        }
+    }
 }
