@@ -34,24 +34,10 @@ public class StartQuiz
      */
     public boolean execute(long telegramId, int questionsCount)
     {
-        // Проверяем, есть ли у юзера незаконченный квиз. Если есть, новый не создаем
-        Optional<QuizSession> maybeLastQuizSession = quizRepository.findQuizSessionByTelegramId(telegramId);
-        if (maybeLastQuizSession.isPresent())
-        {
-            QuizSession lastQuizSession = maybeLastQuizSession.get();
-            Quiz lastQuiz = lastQuizSession.quiz();
-            // Если последний начатый квиз не закончен, используем его
-            if (!(lastQuiz.isAborted() || lastQuiz.isFinished()))
-            {
-                // Если квиз не начат, начнем и обновим сессию
-                if (lastQuiz.isDoingNothing()){
-                    lastQuiz.start();
-                    quizRepository.updateQuizSession(lastQuizSession);
-                }
-                // Новый квиз не создавали, так что возвращаем false;
-                return false;
-            }
-        }
+        if (telegramId <= 0)
+            throw new IllegalArgumentException("Telegram id must be positive");
+
+
 
         if (questionsCount <=0)
         {
@@ -59,7 +45,7 @@ public class StartQuiz
         }
         // ищем вопросы
         List<Question> questions = questionRepository.findRandomQuestions(questionsCount);
-        if (questions.isEmpty()) {
+        if (questions == null || questions.isEmpty()) {
             throw new IllegalStateException("question list is empty");
         }
 
@@ -83,6 +69,6 @@ public class StartQuiz
      */
     public int generateSessionId()
     {
-        return (int) (clock.millis() % Integer.MAX_VALUE);
+        return (int) ((clock.millis() % Integer.MAX_VALUE) & 0x7FFFFFFF);
     }
 }
