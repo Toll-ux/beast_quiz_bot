@@ -331,10 +331,10 @@ class HardcodedUserRepositoryTest {
         repository.updateUserInfo(updated);
 
         User stored = repository.usersForTest().get(tgId);
-        assertEquals(stored.telegramId, tgId);
-        assertEquals(stored.getNickname(), "");
-        assertEquals(stored.getUsername(), "");
-        assertEquals(stored.getTotalScore(), totalScore + 10);
+        assertEquals(tgId, stored.telegramId);
+        assertEquals("", stored.getNickname());
+        assertEquals("", stored.getUsername());
+        assertEquals(totalScore + 10, stored.getTotalScore());
         assertEquals(stored.isUserNormalPlayer(), updated.isUserNormalPlayer());
     }
 
