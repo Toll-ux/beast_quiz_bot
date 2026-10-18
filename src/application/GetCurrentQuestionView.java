@@ -37,10 +37,7 @@ public class GetCurrentQuestionView {
         /* Берем текущий вопрос из квиза */
         Question currentQuestion = quiz.getQuestions().get(quiz.getCurrentQuestionIndex());
         
-        /* Создаем обзор текущего вопроса */
-        QuestionView currentQuestionView = QuestionView.from(currentQuestion);
-        
-        /* Возвращаем обзор на текущий вопрос */
-        return currentQuestionView;
+        /* Создаем обзор текущего вопроса и возвращаем обзор на текущий вопрос*/
+        return QuestionView.from(currentQuestion);
     }
 }
