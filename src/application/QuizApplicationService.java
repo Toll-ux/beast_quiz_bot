@@ -32,7 +32,7 @@ public class QuizApplicationService
     }
 
     /* Метод, начинающий квиз */
-    public StartQuizResult start(long telegramId, int count)
+    public boolean start(long telegramId, int count)
     {
         return startQuiz.execute(telegramId, count);
     }

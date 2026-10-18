@@ -8,6 +8,7 @@ import domain.Quiz;
 import java.util.List;
 import java.time.Clock;
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 /**StartQuiz - отвечает за шаги (1) - (3) ReadMe (стартует сессию, получает вопросы для квиза)*/
 public class StartQuiz
@@ -29,10 +30,29 @@ public class StartQuiz
      *
      * @param telegramId - id юзера
      * @param questionsCount - количество вопросов
-     * @return id сессии, обзор первого вопроса и количество найденных вопросов
+     * @return true, если создали новый квиз и соответствующую сессию, иначе - false.
      */
-    public StartQuizResult execute(long telegramId, int questionsCount)
+    public boolean execute(long telegramId, int questionsCount)
     {
+        // Проверяем, есть ли у юзера незаконченный квиз. Если есть, новый не создаем
+        Optional<QuizSession> maybeLastQuizSession = quizRepository.findQuizSessionByTelegramId(telegramId);
+        if (maybeLastQuizSession.isPresent())
+        {
+            QuizSession lastQuizSession = maybeLastQuizSession.get();
+            Quiz lastQuiz = lastQuizSession.quiz();
+            // Если последний начатый квиз не закончен, используем его
+            if (!(lastQuiz.isAborted() || lastQuiz.isFinished()))
+            {
+                // Если квиз не начат, начнем и обновим сессию
+                if (lastQuiz.isDoingNothing()){
+                    lastQuiz.start();
+                    quizRepository.updateQuizSession(lastQuizSession);
+                }
+                // Новый квиз не создавали, так что возвращаем false;
+                return false;
+            }
+        }
+
         if (questionsCount <=0)
         {
             throw new IllegalArgumentException("questionCount must be positive");
@@ -54,9 +74,7 @@ public class StartQuiz
 
         // сохраняем сессию
         quizRepository.saveQuizSession(quizSession);
-
-        QuestionView firstQuestionView = QuestionView.from(quiz.getQuestions().getFirst());
-        return new StartQuizResult(sessionId, questions.size(), firstQuestionView);
+        return true;
     }
     /**
      *
