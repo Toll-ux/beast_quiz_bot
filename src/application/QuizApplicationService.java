@@ -15,6 +15,7 @@ public class QuizApplicationService
 
     // Объекты StartQuiz, AnswerQuestion, FinishQuiz, созданные по определенному набору интерфейсов репозиториев 
     private final StartQuiz startQuiz;
+    private final GetCurrentQuestionView getCurrentQuestionView;
     private final AnswerQuestion answerQuestion;
     private final FinishQuiz finishQuiz;
 
@@ -27,6 +28,7 @@ public class QuizApplicationService
     ) {
         
         this.startQuiz = new StartQuiz(questionRepository, quizRepository, clock);
+        this.getCurrentQuestionView = new GetCurrentQuestionView(quizRepository);
         this.answerQuestion = new AnswerQuestion(quizRepository);
         this.finishQuiz = new FinishQuiz(quizRepository, userRepository);
     }
@@ -35,6 +37,12 @@ public class QuizApplicationService
     public boolean start(long telegramId, int count)
     {
         return startQuiz.execute(telegramId, count);
+    }
+
+    /* Метод, возвращающий обзор текущего вопроса */
+    public QuestionView PresentQuestion(long telegramId)
+    {
+        return getCurrentQuestionView.execute(telegramId);
     }
 
     /* Метод, закрепляющий ответ юзера на 1 текущий вопрос */
