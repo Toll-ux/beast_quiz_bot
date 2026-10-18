@@ -11,25 +11,26 @@ import java.util.concurrent.CopyOnWriteArraySet;
 
 class QuestionTest {
     /**Референсные переменные*/
-    static final int id = 1;
-    static final String text = "2+2 = ?";
-    static final List<String> answers = List.of("1", "No", "14", "4");
-    static final Set<Integer> correctAnswerIndexes = Set.of(3);
-    static final Question qReference = new Question(id, text, answers, correctAnswerIndexes);
+    final int id = 1;
+    final String text = "2+2 = ?";
+    final List<String> answers = List.of("1", "No", "14", "4");
+    final Set<Integer> correctAnswerIndexes = Set.of(3);
+    final Question qReference = new Question(id, text, answers, correctAnswerIndexes);
 
     /**Переменные для проверки вопроса с одним ответом*/
-    static int idOne = 2;
-    static String textOne = "3+3 = ?";
-    static List<String> answersOne = List.of("6", "9", "4", "4");
-    static Set<Integer> correctAnswerIndexesOne = Set.of(0);
-    static Question questionWithOneAnswer = new Question(idOne, textOne, answersOne, correctAnswerIndexesOne);
+    int idOne = 2;
+    String textOne = "3+3 = ?";
+    List<String> answersOne = List.of("6", "9", "4", "4");
+    Set<Integer> correctAnswerIndexesOne = Set.of(0);
+    Question questionWithOneAnswer = new Question(idOne, textOne, answersOne, correctAnswerIndexesOne);
 
     /**Переменные для проверки вопроса с двумя ответами. Остальные случаи по индукции*/
-    static int idTwo = 3;
-    static String textTwo = "3*3 = ?";
-    static List<String> answersTwo = List.of("9", "No", "18/2", "4");
-    static Set<Integer> correctAnswerIndexesTwo = Set.of(0, 2);
-    static Question questionWithTwoAnswers = new Question(idTwo, textTwo, answersTwo, correctAnswerIndexesTwo);
+    int idTwo = 3;
+    String textTwo = "3*3 = ?";
+    List<String> answersTwo = List.of("9", "No", "18/2", "4");
+    Set<Integer> correctAnswerIndexesTwo = Set.of(0, 2);
+    Question questionWithTwoAnswers = new Question(idTwo, textTwo, answersTwo, correctAnswerIndexesTwo);
+    Set<Integer> correctAnswerIndexesTwoShuffled = Set.of(2, 0);
 
     @DisplayName("Работа конструктора")
     @Test
@@ -221,6 +222,7 @@ class QuestionTest {
     void isCorrectAnswerOneRightAnswers(){
         assertTrue(questionWithOneAnswer.isCorrectAnswer(correctAnswerIndexesOne));
         assertFalse(questionWithOneAnswer.isCorrectAnswer(correctAnswerIndexesTwo));
+        assertFalse(questionWithOneAnswer.isCorrectAnswer(correctAnswerIndexesTwoShuffled));
         assertFalse(questionWithOneAnswer.isCorrectAnswer(correctAnswerIndexes));
     }
 
@@ -228,6 +230,7 @@ class QuestionTest {
     @Test
     void isCorrectAnswerTwoRightAnswers(){
         assertTrue(questionWithTwoAnswers.isCorrectAnswer(correctAnswerIndexesTwo));
+        assertTrue(questionWithTwoAnswers.isCorrectAnswer(correctAnswerIndexesTwoShuffled));
         assertFalse(questionWithTwoAnswers.isCorrectAnswer(correctAnswerIndexesOne));
         assertFalse(questionWithTwoAnswers.isCorrectAnswer(correctAnswerIndexes));
     }
