@@ -9,7 +9,7 @@ import java.util.Set;
 
 /**
  * 
- * AnswerQuestion - класс, в котором осуществляется проверка ответа клиента на корректность и предоставление следующего вопроса
+ * AnswerQuestion - класс, в котором осуществляется проверка ответа клиента на корректность
  */
 
 public class AnswerQuestion
@@ -26,7 +26,7 @@ public class AnswerQuestion
      * @param questionId
      * @param selectedAnswers
      * @return возвращает по текущему вопросу: 1) правильный ли ответ, 2) список правильных ответов;
-     * по квизу: 3) текущее число очков, набранное за квиз, 4) обзор следующего вопроса, 5) завершен ли квиз.
+     * по квизу: 3) текущее число очков, набранное за квиз, 4) завершен ли квиз.
      * 
      * @throws IllegalStateException если у юзера нет активного квиза, 
      *                               если вопрос, на который ожидался ответ не совпадает с переданным методу 
@@ -62,8 +62,7 @@ public class AnswerQuestion
         /* Закрепляем ответ юзера (передаем ответ) */
         AnswerResult answerResult = quiz.submitAnswer(selectedAnswers);
 
-        /* Создаем переменные обзора следующего вопроса и завершен ли квиз */
-        QuestionView nextQuestionView = null;
+        /* Создаем булеву переменную завершен ли квиз */
         boolean finished = false;
 
         /* Смотрим, был ли текущий вопрос последним */
@@ -74,7 +73,6 @@ public class AnswerQuestion
             finished = true;
         } else {
             quiz.nextQuestion();
-            nextQuestionView = QuestionView.from(quiz.getQuestions().get(quiz.getCurrentQuestionIndex()));
         }
 
         /* Обновляем состояние сессии юзера */
@@ -84,7 +82,6 @@ public class AnswerQuestion
             answerResult.correct(),
             answerResult.correctAnswers(),
             quiz.getScore(),
-            nextQuestionView,
             finished
         );
     }

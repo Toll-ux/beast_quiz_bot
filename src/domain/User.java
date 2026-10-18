@@ -8,8 +8,6 @@ enum UserPermissions{
 
 /**Domain - Юзер*/
 public class User {
-    /**Свой идентификатор пользователя*/
-    public final int id;
     /**Идентификатор тг: 10 значное число или меньше, уникальное для любого пользователя и бота*/
     public final long telegramId;
     /**Имя пользователя (имя с @)
@@ -29,25 +27,31 @@ public class User {
      * @throws IllegalArgumentException если id, telegramId, или счет неверные
      * @throws NullPointerException если username или nickname null
      */
-    public User(int id, long telegramId) {
-        this(id, telegramId, "", "", 0);
+    public User(long telegramId) {
+        this(telegramId, "", "", 0);
     }
 
 
-    public User(int id, long telegramId, String username, String nickname, int totalScore) {
-        if (id <= 0) throw new IllegalArgumentException("User id must be positive");
+    public User(long telegramId, String username, String nickname, int totalScore) {
         if (telegramId <= 0) throw new IllegalArgumentException("Telegram id must be positive");
         if (totalScore < 0)
             throw new IllegalArgumentException("Score cannot be negative");
         if (username == null) throw new IllegalArgumentException("Username must not be null");
         if (nickname == null) throw new IllegalArgumentException("Nickname must not be null");
 
-        this.id = id;
         this.telegramId = telegramId;
         this.username = username;
         this.nickname = nickname;
         this.totalScore = totalScore;
         this.permissions = UserPermissions.NORMAL_PLAYER;
+    }
+
+    public User(User other) {
+        this.telegramId = other.telegramId;
+        this.username = other.username;
+        this.nickname = other.nickname;
+        this.totalScore = other.totalScore;
+        this.permissions = other.permissions;
     }
 
     public String getUsername() {

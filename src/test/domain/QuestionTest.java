@@ -221,6 +221,7 @@ class QuestionTest {
     void isCorrectAnswerOneRightAnswers(){
         assertTrue(questionWithOneAnswer.isCorrectAnswer(correctAnswerIndexesOne));
         assertFalse(questionWithOneAnswer.isCorrectAnswer(correctAnswerIndexesTwo));
+        assertFalse(questionWithOneAnswer.isCorrectAnswer(correctAnswerIndexesTwoShuffled));
         assertFalse(questionWithOneAnswer.isCorrectAnswer(correctAnswerIndexes));
     }
 
@@ -228,6 +229,7 @@ class QuestionTest {
     @Test
     void isCorrectAnswerTwoRightAnswers(){
         assertTrue(questionWithTwoAnswers.isCorrectAnswer(correctAnswerIndexesTwo));
+        assertTrue(questionWithTwoAnswers.isCorrectAnswer(correctAnswerIndexesTwoShuffled));
         assertFalse(questionWithTwoAnswers.isCorrectAnswer(correctAnswerIndexesOne));
         assertFalse(questionWithTwoAnswers.isCorrectAnswer(correctAnswerIndexes));
     }
