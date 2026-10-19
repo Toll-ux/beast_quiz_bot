@@ -149,10 +149,10 @@ public class StartQuizTest {
         assertEquals(sq.generateSessionId(), session1.sessionId());
         assertEquals(telegramId, session1.telegramId());
 
-        assertTrue(sq.execute(telegramId, questionsCount));
+        assertFalse(sq.execute(telegramId, questionsCount), "Второй вызов не перезаписывает сессию");
 
         Optional<QuizSession> savedSessionOpt2 = quizRepo.findQuizSessionByTelegramId(telegramId);
-        assertTrue(savedSessionOpt2.isPresent(), "Вторая сессия должна успешно перезаписать первую");
+        assertTrue(savedSessionOpt2.isPresent(), "Второй вызов не удалил сессию юзера");
 
         QuizSession session2 = savedSessionOpt2.get();
         assertEquals(sq.generateSessionId(), session2.sessionId());

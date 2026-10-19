@@ -27,6 +27,10 @@ public class GetCurrentQuestionView {
      */
     public QuestionView execute(long telegramId)
     {
+        /* Убедимся, что telegramId > 0*/
+        if (telegramId <= 0)
+            throw new IllegalArgumentException("Telegram id must be positive");
+
         /* Ищем текущую сессию */
         QuizSession session = quizRepository.findQuizSessionByTelegramId(telegramId)
             .orElseThrow( () -> new IllegalStateException("No active quiz for user with tg id: " + telegramId) );
@@ -36,8 +40,8 @@ public class GetCurrentQuestionView {
 
         /* Берем текущий вопрос из квиза */
         Question currentQuestion = quiz.getQuestions().get(quiz.getCurrentQuestionIndex());
-        
-        /* Создаем обзор текущего вопроса и возвращаем обзор на текущий вопрос*/
+
+        /* Возвращаем обзор на текущий вопрос */
         return QuestionView.from(currentQuestion);
     }
 }
