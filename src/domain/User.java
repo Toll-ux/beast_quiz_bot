@@ -39,6 +39,7 @@ public class User {
         if (username == null) throw new IllegalArgumentException("Username must not be null");
         if (nickname == null) throw new IllegalArgumentException("Nickname must not be null");
 
+        this.id = id;
         this.telegramId = telegramId;
         this.username = username;
         this.nickname = nickname;
