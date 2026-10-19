@@ -40,7 +40,7 @@ public class QuizApplicationService
     }
 
     /* Метод, возвращающий обзор текущего вопроса */
-    public QuestionView PresentQuestion(long telegramId)
+    public QuestionView presentQuestion(long telegramId)
     {
         return getCurrentQuestionView.execute(telegramId);
     }

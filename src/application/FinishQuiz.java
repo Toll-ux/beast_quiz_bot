@@ -81,7 +81,7 @@ public class FinishQuiz
         
         // Сохраняем данные об очках юзера в userRepository
         user.updateTotalScore(score);
-        userRepository.saveUserInfo(user);
+        userRepository.updateUserInfo(user);
 
         return new FinishQuizResult(
             session.sessionId(),

@@ -1,13 +1,7 @@
-import application.AnswerQuestionResult;
-import application.FinishQuizResult;
-import application.QuestionView;
-import application.QuizApplicationService;
-import application.StartQuizResult;
-import application.port.LeaderboardRepository;
+import application.*;
 import application.port.QuestionRepository;
 import application.port.QuizRepository;
 import application.port.UserRepository;
-import infrastructure.HardcodedLeaderboardRepository;
 import infrastructure.HardcodedQuestionRepository;
 import infrastructure.HardcodedQuizRepository;
 import infrastructure.HardcodedUserRepository;
@@ -23,20 +17,15 @@ import java.util.stream.Collectors;
 
 public class TestRun
 {
-    public static void main(String[] args)
-    {
-        LeaderboardRepository leaderboardRepository = new HardcodedLeaderboardRepository();
-        QuestionRepository questionRepository = new HardcodedQuestionRepository();
-        QuizRepository quizRepository = new HardcodedQuizRepository();
-        UserRepository userRepository = new HardcodedUserRepository();
-        Clock clock = Clock.systemDefaultZone();
+    public static final long telegramId = 1;
 
-        userRepository.saveUserInfo(new User(1, 1));
+    public static final QuestionRepository questionRepository = new HardcodedQuestionRepository();
+    public static final QuizRepository quizRepository = new HardcodedQuizRepository();
+    public static final UserRepository userRepository = new HardcodedUserRepository();
+    public static final Scanner scanner = new Scanner(System.in);
+    public static final QuizApplicationService QAS = new QuizApplicationService(questionRepository, quizRepository, userRepository,  Clock.systemDefaultZone());
 
-        QuizApplicationService QAS = new QuizApplicationService(questionRepository, quizRepository, userRepository, leaderboardRepository,  clock);
-
-        Scanner scanner = new Scanner(System.in);
-        IO.println("Hello and welcome to our Quiz-bot!");
+    public static void playQuiz(){
         IO.println("Please enter the desired quiz length (currently support 1-4 questions): ");
 
         int questionCount = scanner.nextInt();
@@ -46,10 +35,13 @@ public class TestRun
             questionCount = 4;
         }
 
-        StartQuizResult startResult = QAS.start(1, questionCount);
-        QuestionView currentQuestionView = startResult.firstQuestionView();
+        if (!QAS.start(telegramId, questionCount)){
+            IO.println("Something goes terrible wrong!!!!!");
+        }
 
         while (true){
+            QuestionView currentQuestionView = QAS.presentQuestion(telegramId);
+
             IO.println(currentQuestionView.text());
 
             List<String> answers = currentQuestionView.answers();
@@ -68,7 +60,7 @@ public class TestRun
 
             int questionId = currentQuestionView.questionId();
 
-            AnswerQuestionResult result = QAS.answer(1, questionId, numbers);
+            AnswerQuestionResult result = QAS.answer(telegramId, questionId, numbers);
 
             if(result.correct()){
                 IO.println("Good job, you answered correctly!");
@@ -80,10 +72,22 @@ public class TestRun
             if(result.finished()){
                 break;
             }
-
-            currentQuestionView = result.nextQuestionView();
         }
-        FinishQuizResult finishedQuiz = QAS.finish(1);
+        FinishQuizResult finishedQuiz = QAS.finish(telegramId);
         IO.println("Nicely done! Your total score was: " + finishedQuiz.quizScore());
+
+    }
+
+    public static void main(String[] args)
+    {
+
+        userRepository.saveUserInfo(new User(telegramId));
+
+        // TODO ::в while предложить посмотреть таблицу лидеров, потом играть. или играть, потом таблицу лидеров
+        IO.println("Hello and welcome to our Quiz-bot!");
+
+        playQuiz();
+
+        //LeaderBoard leaderBoard = new LeaderBoard(session, HardcodedUserRepository);
     }
 }
