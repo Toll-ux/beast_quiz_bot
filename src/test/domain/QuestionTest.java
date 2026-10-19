@@ -30,6 +30,7 @@ class QuestionTest {
     public List<String> answersTwo = List.of("9", "No", "18/2", "4");
     public Set<Integer> correctAnswerIndexesTwo = Set.of(0, 2);
     public Question questionWithTwoAnswers = new Question(idTwo, textTwo, answersTwo, correctAnswerIndexesTwo);
+    public Set<Integer> correctAnswerIndexesTwoShuffled = Set.of(2, 0);
 
     @DisplayName("Работа конструктора")
     @Test

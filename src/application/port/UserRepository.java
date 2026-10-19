@@ -15,14 +15,15 @@ public interface UserRepository
     /**Возвращает Юзера из БД по его тгИД*/
     Optional<User> findUserByTelegramId(long telegramId);
 
-    /**Отправляет данные Юзера в БД*/
+    /**Предполагает, что юзера нет в БД, и сохраняет его данные в БД*/
     void saveUserInfo(User user);
 
-    /** Ничего не возвращает. Сохраняет данные о набранных юзером очков в течение целого квиза */
-    void updateHighScore(long telegramId, int score);
+    /**Предполагает, что юзер уже есть в БД, новые данные юзера заменяют старые*/
+    void updateUserInfo(User user);
 
     /** Возвращает первые 10 игроков
      * @return список игроков по порядку 0 = 1-ый и тд.
+     * Места (int place) в LeaderboardEntry начинаются с 1
      */
     List<LeaderboardEntry> findTopTen();
 

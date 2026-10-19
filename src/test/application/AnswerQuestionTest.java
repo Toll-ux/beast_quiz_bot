@@ -26,7 +26,7 @@ public class AnswerQuestionTest {
 
     final long telegramId = 20;
     final int questionsCount = 1;
-    final int questionId = 0;
+    final int questionId = 1;
     final Set<Integer> selectedAnswers = Set.of(1);
 
     @DisplayName("Инициализация класса AnswerQuestion")
@@ -113,7 +113,7 @@ public class AnswerQuestionTest {
 
     }
 
-    @DisplayName("execute: пользователь дал верный ответ")
+    @DisplayName("execute: пользователь дал верный ответ на 1 вопрос")
     @Test
     void execute(){
         StartQuiz sq = new StartQuiz(questionRepo, quizRepo, clock);
@@ -121,22 +121,23 @@ public class AnswerQuestionTest {
 
         AnswerQuestion aq = new AnswerQuestion(quizRepo);
         AnswerQuestionResult aqRes = aq.execute(telegramId, 1, Set.of(1));
-
+        GetCurrentQuestionView gq = new GetCurrentQuestionView(quizRepo);
 
         assertTrue(aqRes.correct(), "Ответ должен быть верным");
         assertEquals(Set.of(1), aqRes.correctAnswers());
         assertTrue(aqRes.currentScore() > 0, "Очки за правильный ответ должны быть больше 0");
         assertTrue(aqRes.finished(), "Квиз должен быть завершен, так как это был последний вопрос");
-        assertNull(aqRes.nextQuestionView(), "NextQuestionView должен быть null для финального вопроса");
+        assertEquals(questionRepo.getQuestion(0), gq.execute(telegramId));
 
         Optional<QuizSession> updatedSessionOpt = quizRepo.findQuizSessionByTelegramId(telegramId);
         assertTrue(updatedSessionOpt.isPresent());
         assertEquals(aqRes.currentScore(), updatedSessionOpt.get().quiz().getScore());
     }
 
-    @DisplayName("execute: пользователь дал неверный ответ")
+    @DisplayName("execute: пользователь дал неверный ответ на 1 вопрос")
     @Test
     void executeWithIncorrectAnswer(){
+        GetCurrentQuestionView gq = new GetCurrentQuestionView(quizRepo);
         StartQuiz sq = new StartQuiz(questionRepo, quizRepo, clock);
         sq.execute(telegramId, questionsCount);
 
@@ -151,7 +152,7 @@ public class AnswerQuestionTest {
         assertEquals(0, aqRes.currentScore(), "Очки за неверный ответ начисляться не должны");
 
         assertTrue(aqRes.finished(), "Квиз должен быть завершен, даже если ответ неверный");
-        assertNull(aqRes.nextQuestionView(), "Следующего вопроса быть не должно");
+        assertEquals(questionRepo.getQuestion(0), gq.execute(telegramId));
 
         Optional<QuizSession> updatedSessionOpt = quizRepo.findQuizSessionByTelegramId(telegramId);
         assertTrue(updatedSessionOpt.isPresent());
@@ -204,15 +205,18 @@ public class AnswerQuestionTest {
     @DisplayName("execute: пользователь дал верный ответ 3 вопроса")
     @Test
     void executeTreeQuestions(){
+        int totalQuestions = 3;
+
         StartQuiz sq = new StartQuiz(questionRepo, quizRepo, clock);
-        sq.execute(telegramId, 3);
+        sq.execute(telegramId, totalQuestions);
 
+        GetCurrentQuestionView gq = new GetCurrentQuestionView(quizRepo);
         AnswerQuestion aq = new AnswerQuestion(quizRepo);
-
-        for (int i = 1; i <= 3; i++) {
+        AnswerQuestionResult aqRes = null;
+        for (int i = 1; i <= totalQuestions; i++) {
+            assertEquals(questionRepo.getQuestion(i-1).questionId(), gq.execute(telegramId).questionId());
             Set<Integer> rightAns = questionRepo.getAnswer(i);
-            AnswerQuestionResult aqRes = aq.execute(telegramId, i, rightAns);
-
+            aqRes = aq.execute(telegramId, i, rightAns);
 
             assertTrue(aqRes.correct(), "Ответ должен быть верным");
             assertEquals(rightAns, aqRes.correctAnswers());
@@ -222,12 +226,7 @@ public class AnswerQuestionTest {
             Optional<QuizSession> updatedSessionOpt = quizRepo.findQuizSessionByTelegramId(telegramId);
             assertTrue(updatedSessionOpt.isPresent());
             assertEquals(aqRes.currentScore(), updatedSessionOpt.get().quiz().getScore());
-
-            if (i == 3) {
-                assertNull(aqRes.nextQuestionView(), "NextQuestionView должен быть null для финального вопроса");
-                assertTrue(aqRes.finished(), "Квиз должен быть завершен, так как это был последний вопрос");
-
-            }
         }
+        assertTrue(aqRes.finished(), "Квиз должен быть завершен, так как это был последний вопрос");
     }
 }
