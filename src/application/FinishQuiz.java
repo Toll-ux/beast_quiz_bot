@@ -83,9 +83,6 @@ public class FinishQuiz
         user.updateTotalScore(score);
         userRepository.saveUserInfo(user);
 
-        // Сохраняем данные об очках за квиз в leaderboardRepository
-        userRepository.updateHighScore(user.telegramId, user.getTotalScore());
-
         return new FinishQuizResult(
             session.sessionId(),
             score,

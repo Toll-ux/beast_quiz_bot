@@ -4,9 +4,9 @@ package application;
  *
  * @param place - место пользователя в списке
  * @param score - счет пользователя
- * @param telegramId - id пользователя
+ * @param nickname - никнейм пользователя
  */
 
-public record LeaderboardEntry(int place, int score, long telegramId) {
+public record LeaderboardEntry(int place, int score, String nickname) {
 
 }
