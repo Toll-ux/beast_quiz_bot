@@ -7,7 +7,7 @@ import java.util.Set;
 import java.time.Clock;
 
 /**
- *
+ * 
  * QuizApplicationService - один общий класс для всего сервиса application
  */
 
@@ -23,13 +23,13 @@ public class QuizApplicationService
 
     // Конструктор объекта QuizApplicationService на основе связки интерфейсов репозиториев вопросов, квизов, юзеров и лидерборда
     public QuizApplicationService(
-            QuestionRepository questionRepository,
-            QuizRepository quizRepository,
-            UserRepository userRepository,
-            Clock clock
+        QuestionRepository questionRepository,
+        QuizRepository quizRepository,
+        UserRepository userRepository,
+        Clock clock
     ) {
-
-        this.startQuiz = new StartQuiz(questionRepository, quizRepository, clock);
+        
+        this.startQuiz = new StartQuiz(userRepository, questionRepository, quizRepository, clock);
         this.getCurrentQuestionView = new GetCurrentQuestionView(quizRepository);
         this.answerQuestion = new AnswerQuestion(quizRepository);
         this.finishQuiz = new FinishQuiz(quizRepository, userRepository);
@@ -67,8 +67,7 @@ public class QuizApplicationService
     }
 
     /** Метод, после квиз давать лидерборд */
-    public List<LeaderboardEntry> getLeaderBoard(long telegramId)
-    {
+    public List<LeaderboardEntry> getLeaderBoard(long telegramId){
         return leaderBoard.getUsersPosition(telegramId);
     }
 }
