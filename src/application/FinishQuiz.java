@@ -25,6 +25,9 @@ public class FinishQuiz
      */
     public FinishQuizResult finish(long telegramId)
     {
+        if (telegramId <= 0)
+            throw new IllegalArgumentException("Telegram id must be positive");
+
         QuizSession session = quizRepository.findQuizSessionByTelegramId(telegramId)
             .orElseThrow( () -> new IllegalStateException("No active quiz for user with tg id: " + telegramId) );
         
@@ -35,8 +38,15 @@ public class FinishQuiz
             try {
                 quiz.finish();
             } catch (IllegalStateException ignored){
-                //Если уже завершили, то не проблема (например, если изменили домен, чтобы квиз сам завершался)
+                // Если повторно завершаем квиз, ничего не сохраняем в репозиториях
+                return new FinishQuizResult(
+                        session.sessionId(),
+                        0,
+                        0
+                );
             }
+        } else {
+            throw new IllegalStateException("Quiz score cannot be negative");
         }
 
         return persistAndReport(session, quiz);
@@ -49,14 +59,26 @@ public class FinishQuiz
      */
     public FinishQuizResult abort(long telegramId)
     {
+        if (telegramId <= 0)
+            throw new IllegalArgumentException("Telegram id must be positive");
+
         QuizSession session = quizRepository.findQuizSessionByTelegramId(telegramId)
             .orElseThrow( () -> new IllegalStateException("No active quiz for user with tg id: " + telegramId) );
         
         Quiz quiz = session.quiz();
-        try {
-            quiz.abort();
-        } catch (IllegalStateException ignored){
-            //Если уже покинули, то не проблема (например, если изменили домен, чтобы квиз сам покидался)
+        if (quiz.getScore() >= 0) {
+            try {
+                quiz.abort();
+            } catch (IllegalStateException ignored) {
+                // Если повторно абортим квиз, ничего не сохраняем в репозиториях
+                return new FinishQuizResult(
+                        session.sessionId(),
+                        0,
+                        0
+                );
+            }
+        } else {
+            throw new IllegalStateException("Quiz score cannot be negative");
         }
 
         return persistAndReport(session, quiz);
@@ -70,9 +92,6 @@ public class FinishQuiz
      */
     private FinishQuizResult persistAndReport(QuizSession session, Quiz quiz)
     {
-        // Сохраняем результат сессии
-        quizRepository.updateQuizSession(session);
-        
         int score = quiz.getScore();
 
         // Ищем юзера
@@ -81,7 +100,10 @@ public class FinishQuiz
         
         // Сохраняем данные об очках юзера в userRepository
         user.updateTotalScore(score);
-        userRepository.saveUserInfo(user);
+        userRepository.updateUserInfo(user);
+
+        // Сохраняем результат сессии
+        quizRepository.updateQuizSession(session);
 
         return new FinishQuizResult(
             session.sessionId(),

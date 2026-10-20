@@ -67,8 +67,7 @@ public class QuizApplicationService
     }
 
     /** Метод, после квиз давать лидерборд */
-    public List<LeaderboardEntry> getLeaderBoard(long telegramId)
-    {
+    public List<LeaderboardEntry> getLeaderBoard(long telegramId){
         return leaderBoard.getUsersPosition(telegramId);
     }
 }

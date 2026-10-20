@@ -14,7 +14,6 @@ public class LeaderBoard {
 
     /**Конструктор класса
      *
-     *
      * @param userRepository инфраструктура для лидерборда
      */
     public LeaderBoard(UserRepository userRepository){

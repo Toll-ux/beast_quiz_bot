@@ -18,6 +18,7 @@ public class FakeQuestionRepo implements QuestionRepository {
     public boolean isOutputNull = false;
     public boolean isOutputEmpty = false;
 
+    /**Вопрос не рандомный, но название метода должно соответствовать интерфейсу*/
     @Override
     public List<Question> findRandomQuestions(int questionsCount) {
         if (isOutputNull) return null;
@@ -33,6 +34,10 @@ public class FakeQuestionRepo implements QuestionRepository {
         }
         //Возвращаем независимый список, а не представление части исходного
         return new ArrayList<>(questions.subList(0, questionsCount));
+    }
+
+    public QuestionView getQuestion (int index){
+           return QuestionView.from(questions.get(index));
     }
 
     public Set<Integer> getAnswer(int questionId){
