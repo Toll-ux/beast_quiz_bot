@@ -10,30 +10,27 @@ import java.util.Set;
 /**Класс лидерборд - часть app, нужен, чтобы возвращать лидерборд*/
 public class LeaderBoard {
 
-    private final QuizSession quizSession;
     private final UserRepository userRepository;
 
     /**Конструктор класса
      *
-     * @param quizSession сессия квиза
      * @param userRepository инфраструктура для лидерборда
      */
-    public LeaderBoard(QuizSession quizSession, UserRepository userRepository){
-        this.quizSession = quizSession;
+    public LeaderBoard(UserRepository userRepository){
         this.userRepository = userRepository;
     }
 
     /**Функция берет топ 10 игроков из лидерборда и 1 игрок выше юзера, юзера и 1 ниже юзера.
      * Их комбинирует и возвращает отсортированный список
      */
-    public  List<LeaderboardEntry> getUsersPosition(){
+    public  List<LeaderboardEntry> getUsersPosition(long telegramId){
         // топ 10
         List<LeaderboardEntry> topTen = userRepository.findTopTen();
         // не пустой ли он
         if (topTen.isEmpty())
             throw new IllegalStateException("Leaderboard data is missing or database is empty");
         // кусок у юзера
-        List<LeaderboardEntry> usersSlice = userRepository.findUserAndClosest(quizSession.telegramId());
+        List<LeaderboardEntry> usersSlice = userRepository.findUserAndClosest(telegramId);
         // не пустой ли он
         if (usersSlice.isEmpty())
             throw new IllegalStateException("User slice data is missing or database is empty");
