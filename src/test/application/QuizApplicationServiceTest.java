@@ -322,8 +322,8 @@ public class QuizApplicationServiceTest {
         // Подготавливаем пользователя.
         User user = new User(
                 telegramId,
-                "@test_user",
-                "TestUser",
+                username,
+                nickname,
                 0
         );
         userRepo.saveUserInfo(user);
@@ -361,8 +361,8 @@ public class QuizApplicationServiceTest {
 
         User user = new User(
                 telegramId,
-                "@test_user",
-                "TestUser",
+                username,
+                nickname,
                 0
         );
         userRepo.saveUserInfo(user);
@@ -376,6 +376,7 @@ public class QuizApplicationServiceTest {
         assertEquals(0, result.userTotalScore());
         assertTrue(session.quiz().isAborted());
     }
+
     @DisplayName("abort: нет активного квиза")
     @Test
     void abortWithoutActiveQuiz() {
@@ -397,7 +398,7 @@ public class QuizApplicationServiceTest {
     void getLeaderBoardNormal() {
         QuizApplicationService service = createService();
 
-        User user = new User(telegramId,username, nickname, 100);
+        User user = new User(telegramId, username, nickname, 100);
         userRepo.saveUserInfo(user);
 
         List<LeaderboardEntry> result = service.getLeaderBoard(telegramId);
@@ -445,5 +446,109 @@ public class QuizApplicationServiceTest {
                 "User slice data is missing or database is empty",
                 thrown.getMessage()
         );
+    }
+
+    @DisplayName("finish: Завершение квиза идемпотентно — повторный finish() не падает, возвращает идентичный результат и не начисляет очки пользователю второй раз, ни в ответе, ни в базе данных.")
+    @Test
+    void finishQuizTwice() {
+        User user = new User(telegramId, username, nickname, 0);
+        userRepo.saveUserInfo(user);
+
+        QuizApplicationService service = createService();
+        QuizSession session = startQuiz(service);
+
+        FinishQuizResult firstResult = service.finish(telegramId);
+
+        assertTrue(session.quiz().isFinished());
+
+        FinishQuizResult secondResult =
+                assertDoesNotThrow(() -> service.finish(telegramId));
+
+        assertEquals(firstResult.sessionId(), secondResult.sessionId());
+        assertEquals(firstResult.quizScore(), secondResult.quizScore());
+        assertEquals(firstResult.userTotalScore(), secondResult.userTotalScore());
+
+        assertTrue(session.quiz().isFinished());
+
+        User savedUser =
+                userRepo.findUserByTelegramId(telegramId).orElseThrow();
+
+        assertEquals(firstResult.userTotalScore(), savedUser.getTotalScore());
+    }
+
+    @DisplayName("abort: Отмена квиза идемпотентна")
+    @Test
+    void abortQuizTwice() {
+        User user = new User(telegramId, username, nickname, 0);
+        userRepo.saveUserInfo(user);
+
+        QuizApplicationService service = createService();
+        QuizSession session = startQuiz(service);
+
+        FinishQuizResult firstResult = service.abort(telegramId);
+
+        assertTrue(session.quiz().isAborted());
+
+        FinishQuizResult secondResult =
+                assertDoesNotThrow(() -> service.abort(telegramId));
+
+        assertEquals(firstResult.sessionId(), secondResult.sessionId());
+        assertEquals(firstResult.quizScore(), secondResult.quizScore());
+        assertEquals(firstResult.userTotalScore(), secondResult.userTotalScore());
+
+        assertTrue(session.quiz().isAborted());
+
+        User savedUser =
+                userRepo.findUserByTelegramId(telegramId).orElseThrow();
+
+        assertEquals(firstResult.userTotalScore(), savedUser.getTotalScore());
+    }
+
+    @DisplayName("abort: нельзя ответить после отмены квиза")
+    @Test
+    void cannotAnswerAfterAbort() {
+        User user = new User(telegramId, username, nickname, 0);
+        userRepo.saveUserInfo(user);
+
+        QuizApplicationService service = createService();
+        QuizSession session = startQuiz(service);
+
+        Question question = session.quiz().getQuestions().getFirst();
+
+        service.abort(telegramId);
+
+        assertThrows(
+                IllegalStateException.class,
+                () -> service.answer(
+                        telegramId,
+                        question.id(),
+                        question.correctAnswerIndexes()
+                )
+        );
+
+        assertTrue(session.quiz().isAborted());
+    }
+
+    @DisplayName("finish после abort: не падает и не начисляет очки повторно")
+    @Test
+    void finishAfterAbort() {
+        User user = new User(telegramId, username, nickname, 0);
+        userRepo.saveUserInfo(user);
+
+        QuizApplicationService service = createService();
+        QuizSession session = startQuiz(service);
+
+        FinishQuizResult abortResult = service.abort(telegramId);
+
+        FinishQuizResult finishResult =
+                assertDoesNotThrow(() -> service.finish(telegramId));
+
+        assertEquals(abortResult.sessionId(), finishResult.sessionId());
+        assertTrue(session.quiz().isAborted());
+
+        User savedUser =
+                userRepo.findUserByTelegramId(telegramId).orElseThrow();
+
+        assertEquals(finishResult.userTotalScore(), savedUser.getTotalScore());
     }
 }
