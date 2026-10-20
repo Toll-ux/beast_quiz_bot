@@ -33,6 +33,15 @@ public class AnswerQuestion
      */
     public AnswerQuestionResult execute(long telegramId, int questionId, Set<Integer> selectedAnswers)
     {
+        if (telegramId <= 0)
+            throw new IllegalArgumentException("Telegram id must be positive");
+
+        if (questionId <= 0)
+            throw new IllegalArgumentException("Question id must be positive");
+
+        if (selectedAnswers == null || selectedAnswers.isEmpty())
+            throw new IllegalArgumentException("selectedAnswers must not be Empty");
+
         /* Ищем текущую сессию */
         QuizSession session = quizRepository.findQuizSessionByTelegramId(telegramId)
             .orElseThrow( () -> new IllegalStateException("No active quiz for user with tg id: " + telegramId) );

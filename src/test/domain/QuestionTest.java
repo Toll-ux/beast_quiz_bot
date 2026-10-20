@@ -11,26 +11,25 @@ import java.util.concurrent.CopyOnWriteArraySet;
 
 class QuestionTest {
     /**Референсные переменные*/
-    final int id = 1;
-    final String text = "2+2 = ?";
-    final List<String> answers = List.of("1", "No", "14", "4");
-    final Set<Integer> correctAnswerIndexes = Set.of(3);
-    final Question qReference = new Question(id, text, answers, correctAnswerIndexes);
+    public final int id = 1;
+    public final String text = "2+2 = ?";
+    public final List<String> answers = List.of("1", "No", "14", "4");
+    public final Set<Integer> correctAnswerIndexes = Set.of(3);
+    public final Question qReference = new Question(id, text, answers, correctAnswerIndexes);
 
     /**Переменные для проверки вопроса с одним ответом*/
-    int idOne = 2;
-    String textOne = "3+3 = ?";
-    List<String> answersOne = List.of("6", "9", "4", "4");
-    Set<Integer> correctAnswerIndexesOne = Set.of(0);
-    Question questionWithOneAnswer = new Question(idOne, textOne, answersOne, correctAnswerIndexesOne);
+    public int idOne = 2;
+    public String textOne = "3+3 = ?";
+    public List<String> answersOne = List.of("6", "9", "4", "4");
+    public Set<Integer> correctAnswerIndexesOne = Set.of(0);
+    public Question questionWithOneAnswer = new Question(idOne, textOne, answersOne, correctAnswerIndexesOne);
 
     /**Переменные для проверки вопроса с двумя ответами. Остальные случаи по индукции*/
-    int idTwo = 3;
-    String textTwo = "3*3 = ?";
-    List<String> answersTwo = List.of("9", "No", "18/2", "4");
-    Set<Integer> correctAnswerIndexesTwo = Set.of(0, 2);
-    Question questionWithTwoAnswers = new Question(idTwo, textTwo, answersTwo, correctAnswerIndexesTwo);
-    Set<Integer> correctAnswerIndexesTwoShuffled = Set.of(2, 0);
+    public int idTwo = 3;
+    public String textTwo = "3*3 = ?";
+    public List<String> answersTwo = List.of("9", "No", "18/2", "4");
+    public Set<Integer> correctAnswerIndexesTwo = Set.of(0, 2);
+    public Question questionWithTwoAnswers = new Question(idTwo, textTwo, answersTwo, correctAnswerIndexesTwo);
 
     @DisplayName("Работа конструктора")
     @Test

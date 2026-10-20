@@ -2,6 +2,8 @@ package application;
 
 import application.port.QuestionRepository;
 import application.port.QuizRepository;
+import application.port.UserRepository;
+import domain.User;
 import domain.Question;
 import domain.Quiz;
 
@@ -13,6 +15,8 @@ import java.util.Optional;
 /**StartQuiz - отвечает за шаги (1) - (3) ReadMe (стартует сессию, получает вопросы для квиза)*/
 public class StartQuiz
 {
+    /**userRepository - интерфейс репозитория юзера */
+    private final UserRepository userRepository;
     /**questionRepository - интерфейс репозитория вопросов*/
     private final QuestionRepository questionRepository;
     /**quizRepository - интерфейс репозитория квизов*/
@@ -20,8 +24,9 @@ public class StartQuiz
     /**clock - часы*/
     private final Clock clock;
 
-    public StartQuiz(QuestionRepository questionRepository, QuizRepository quizRepository, Clock clock)
+    public StartQuiz(UserRepository userRepository, QuestionRepository questionRepository, QuizRepository quizRepository, Clock clock)
     {
+        this.userRepository = userRepository;
         this.questionRepository = questionRepository;
         this.quizRepository = quizRepository;
         this.clock = clock;
@@ -34,6 +39,17 @@ public class StartQuiz
      */
     public boolean execute(long telegramId, int questionsCount)
     {
+        if (telegramId <= 0)
+            throw new IllegalArgumentException("Telegram id must be positive");
+
+        // Проверяем, есть ли юзер в репозитории. Если нет - создаем
+        Optional<User> maybeUser = userRepository.findUserByTelegramId(telegramId);
+        if (maybeUser.isEmpty())
+        {
+            User newUser = new User(telegramId);
+            userRepository.saveUserInfo(newUser);
+        }
+
         // Проверяем, есть ли у юзера незаконченный квиз. Если есть, новый не создаем
         Optional<QuizSession> maybeLastQuizSession = quizRepository.findQuizSessionByTelegramId(telegramId);
         if (maybeLastQuizSession.isPresent())
@@ -59,7 +75,7 @@ public class StartQuiz
         }
         // ищем вопросы
         List<Question> questions = questionRepository.findRandomQuestions(questionsCount);
-        if (questions.isEmpty()) {
+        if (questions == null || questions.isEmpty()) {
             throw new IllegalStateException("question list is empty");
         }
 
@@ -83,6 +99,6 @@ public class StartQuiz
      */
     public int generateSessionId()
     {
-        return (int) (clock.millis() % Integer.MAX_VALUE);
+        return (int) ((clock.millis() % Integer.MAX_VALUE) & 0x7FFFFFFF);
     }
 }
