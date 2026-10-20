@@ -9,8 +9,11 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import java.time.Clock;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 
 public class StartQuizTest {
@@ -21,6 +24,8 @@ public class StartQuizTest {
             Instant.parse("2026-10-14T12:15:00Z"),
             ZoneId.of("UTC")
     );
+
+    private final List<Question> questions = List.of(new Question(1, "s", List.of("s"), Set.of(0)));
 
     final long telegramId = 20;
     int questionsCount = 2;
@@ -230,4 +235,26 @@ public class StartQuizTest {
         assertTrue(sq.execute(telegramId, questionsCount));
         assertEquals(1, quizRepo.getSessionsCount(), "Новая сессия не должна быть записана!");
     }
+
+    @DisplayName("execute: незаконченная сессия в isDoingNothing -> start() и update()")
+    @Test
+    void executeStartsQuizAndUpdatesSessionWhenQuizIsDoingNothing() {
+        Quiz quiz = new Quiz(questions);
+        LocalDateTime now = LocalDateTime.now(clock);
+        quizRepo.saveQuizSession(new QuizSession(1, telegramId, quiz, now));
+        QuizSession session = quizRepo.getQuizSessions().get(telegramId);
+        assertTrue(session.quiz().isDoingNothing(),
+                "Свежесозданный quiz должен быть в состоянии isDoingNothing");
+
+        StartQuiz sq = new StartQuiz(userRepo, questionRepo, quizRepo, clock);
+
+        // второй вызов должен запустить квиз и обновить сессию
+        boolean result = sq.execute(telegramId, questionsCount);
+
+        assertFalse(result, "Повторный вызов не создаёт новый квиз");
+        assertEquals(1, quizRepo.getSessionsCount(), "Новая сессия не должна быть создана");
+        assertFalse(session.quiz().isDoingNothing(),
+                "Квиз должен был перейти в started-состояние");
+    }
+
 }
