@@ -27,7 +27,7 @@ public class QuizApplicationService
         Clock clock
     ) {
         
-        this.startQuiz = new StartQuiz(questionRepository, quizRepository, clock);
+        this.startQuiz = new StartQuiz(userRepository, questionRepository, quizRepository, clock);
         this.getCurrentQuestionView = new GetCurrentQuestionView(quizRepository);
         this.answerQuestion = new AnswerQuestion(quizRepository);
         this.finishQuiz = new FinishQuiz(quizRepository, userRepository);
