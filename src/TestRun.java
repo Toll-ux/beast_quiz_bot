@@ -19,7 +19,7 @@ public class TestRun
     private final PrintStream out;
     private final QuizApplicationService QAS;
 
-    public TestRun(Scanner scanner, PrintStream out, QuizApplicationService QAS, HardcodedUserRepository userRepo) {
+    public TestRun(Scanner scanner, PrintStream out, QuizApplicationService QAS) {
         this.scanner = scanner;
         this.out = out;
         this.QAS = QAS;
@@ -164,11 +164,11 @@ public class TestRun
         QuizApplicationService QAS = new QuizApplicationService(
                 new HardcodedQuestionRepository(),
                 new HardcodedQuizRepository(),
-                userRepo,
+                new HardcodedUserRepository(),
                 Clock.systemDefaultZone()
         );
 
-        TestRun runner = new TestRun(scanner, System.out, QAS, userRepo);
+        TestRun runner = new TestRun(scanner, System.out, QAS);
         runner.run();
     }
 
