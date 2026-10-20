@@ -7,18 +7,16 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class UserTest {
-    static final int id = 1;
-    static final long tgId =123333;
-    static final String username = "@qwer";
-    static final String nickname = "alex123";
-    static final int totalScore = 123;
-    static final User uBaseReference = new User(id, tgId);
-    static final User uAddReference = new User(id, tgId, username, nickname, totalScore);
+    final long tgId =123333;
+    final String username = "@qwer";
+    final String nickname = "alex123";
+    final int totalScore = 123;
+    final User uBaseReference = new User(tgId);
+    final User uAddReference = new User(tgId, username, nickname, totalScore);
 
     @DisplayName("Перегруженный конструктор работает")
     @Test
     void ConstructorDefaultValues() {
-        assertEquals(id, uBaseReference.id);
         assertEquals(tgId, uBaseReference.telegramId);
         assertEquals("", uBaseReference.getNickname());
         assertEquals("", uBaseReference.getUsername());
@@ -29,7 +27,6 @@ class UserTest {
     @DisplayName("Конструктор работает")
     @Test
     void ConstructorSomeValues(){
-        assertEquals(id, uAddReference.id);
         assertEquals(tgId, uAddReference.telegramId);
         assertEquals(username, uAddReference.getUsername());
         assertEquals(nickname, uAddReference.getNickname());
@@ -37,36 +34,21 @@ class UserTest {
         assertTrue(uAddReference.isUserNormalPlayer());
     }
 
-    @DisplayName("Конструктор инициализация id 0")
-    @Test
-    void ConstructorZeroId(){
-        IllegalArgumentException thrown = Assertions.assertThrows(IllegalArgumentException.class, () ->
-                new User(0, tgId));
-        Assertions.assertEquals("User id must be positive", thrown.getMessage());
-    }
 
     @DisplayName("Конструктор инициализация телеграм id 0")
     @Test
     void ConstructorZeroTgId(){
         IllegalArgumentException thrown = Assertions.assertThrows(IllegalArgumentException.class, () ->
-                new User(id, 0));
+                new User(0));
         Assertions.assertEquals("Telegram id must be positive", thrown.getMessage());
     }
 
-    @DisplayName("Конструктор инициализация id < 0")
-    @Test
-    void ConstructorNegativeId(){
-        IllegalArgumentException thrown = Assertions.assertThrows(IllegalArgumentException.class, () ->
-            new User(-100, tgId));
-
-        Assertions.assertEquals("User id must be positive", thrown.getMessage());
-    }
 
     @DisplayName("Конструктор инициализация телеграм id < 0")
     @Test
     void ConstructorNegativeTgId(){
         IllegalArgumentException thrown = Assertions.assertThrows(IllegalArgumentException.class, () ->
-            new User(id, -100));
+            new User(-100));
 
         Assertions.assertEquals("Telegram id must be positive", thrown.getMessage());
     }
@@ -74,14 +56,14 @@ class UserTest {
     @DisplayName("Конструктор инициализация счет = 0")
     @Test
     void ConstructorZeroTotalScore(){
-        Assertions.assertDoesNotThrow(() -> new User(id, tgId, username, nickname, 0));
+        Assertions.assertDoesNotThrow(() -> new User(tgId, username, nickname, 0));
     }
 
     @DisplayName("Конструктор инициализация счет < 0")
     @Test
     void ConstructorNegativeTotalScore(){
         IllegalArgumentException thrown = Assertions.assertThrows(IllegalArgumentException.class, () ->
-            new User(id, tgId, username, nickname, -100));
+            new User(tgId, username, nickname, -100));
 
         Assertions.assertEquals("Score cannot be negative", thrown.getMessage());
     }
@@ -90,7 +72,7 @@ class UserTest {
     @Test
     void ConstructorNullNickname(){
         IllegalArgumentException thrown = Assertions.assertThrows(IllegalArgumentException.class, () ->
-                new User(id, tgId, username, null, totalScore));
+                new User(tgId, username, null, totalScore));
 
         Assertions.assertEquals("Nickname must not be null", thrown.getMessage());
     }
@@ -99,7 +81,7 @@ class UserTest {
     @Test
     void ConstructorNullUsername(){
         IllegalArgumentException thrown = Assertions.assertThrows(IllegalArgumentException.class, () ->
-                new User(id, tgId, null, nickname, totalScore));
+                new User(tgId, null, nickname, totalScore));
 
         Assertions.assertEquals("Username must not be null", thrown.getMessage());
     }
@@ -122,7 +104,7 @@ class UserTest {
     @Test
     void updateTotalScoreBiggerRes () {
         int totalScoreNew = 12;
-        User user = new User(id, tgId);
+        User user = new User(tgId);
         user.updateTotalScore(totalScoreNew);
         assertEquals(totalScoreNew, user.getTotalScore());
     }
@@ -131,7 +113,7 @@ class UserTest {
     @Test
     void updateTotalScoreLessRes () {
         int totalScoreNew = 12;
-        User user = new User(id, tgId, username, nickname, totalScore);
+        User user = new User(tgId, username, nickname, totalScore);
         user.updateTotalScore(totalScoreNew);
         Assertions.assertNotEquals(totalScoreNew, user.getTotalScore());
     }
@@ -139,7 +121,7 @@ class UserTest {
     @DisplayName("Обновить счет, задан счет такой же")
     @Test
     void updateTotalScoreSameRes () {
-        User user = new User(id, tgId, username, nickname, totalScore);
+        User user = new User(tgId, username, nickname, totalScore);
         user.updateTotalScore(totalScore);
         assertEquals(totalScore, user.getTotalScore());
     }
@@ -147,7 +129,7 @@ class UserTest {
     @DisplayName("setUsername нормально работает")
     @Test
     void SetUsername() {
-        User user = new User(id, tgId);
+        User user = new User(tgId);
         user.setUsername(username);
         assertEquals(username, user.getUsername());
     }
@@ -155,7 +137,7 @@ class UserTest {
     @DisplayName("setUsername получил пустую строчку")
     @Test
     void setEmptyUsername (){
-        User user = new User(id, tgId);
+        User user = new User( tgId);
         IllegalArgumentException thrown = Assertions.assertThrows(IllegalArgumentException.class, () ->
             user.setUsername(""));
 
@@ -165,7 +147,7 @@ class UserTest {
     @DisplayName("setUsername получил null")
     @Test
     void setNullUsername (){
-        User user = new User(id, tgId);
+        User user = new User(tgId);
         IllegalArgumentException thrown = Assertions.assertThrows(IllegalArgumentException.class, () ->
                 user.setUsername(null));
 
@@ -175,7 +157,7 @@ class UserTest {
     @DisplayName("setUsername получил строку с @ не в начале")
     @Test
     void SetWrongAtSignUsername(){
-        User user = new User(id, tgId);
+        User user = new User(tgId);
         IllegalArgumentException atSignInEnd = Assertions.assertThrows(IllegalArgumentException.class, () ->
             user.setUsername("123@"));
 
@@ -190,7 +172,7 @@ class UserTest {
     @DisplayName("setUsername получил строку без @")
     @Test
     void SetWrongUsername(){
-        User user = new User(id, tgId);
+        User user = new User(tgId);
         IllegalArgumentException thrown = Assertions.assertThrows(IllegalArgumentException.class, () -> {
             user.setUsername("123");
         });
@@ -201,7 +183,7 @@ class UserTest {
     @DisplayName("SetNickname нормально работает")
     @Test
     void SetNickname() {
-        User user = new User(id, tgId);
+        User user = new User(tgId);
         user.setNickname(nickname);
         assertEquals(nickname, user.getNickname());
     }
@@ -209,7 +191,7 @@ class UserTest {
     @DisplayName("setNickname получил пустую строчку")
     @Test
     void SetEmptyNickname (){
-        User user = new User(id, tgId);
+        User user = new User(tgId);
         IllegalArgumentException thrown = Assertions.assertThrows(IllegalArgumentException.class, () -> {
             user.setNickname("");
         });
@@ -220,7 +202,7 @@ class UserTest {
     @DisplayName("setUsername получил null")
     @Test
     void setNullNickname(){
-        User user = new User(id, tgId);
+        User user = new User(tgId);
         IllegalArgumentException thrown = Assertions.assertThrows(IllegalArgumentException.class, () ->
                 user.setNickname(null));
 
@@ -230,7 +212,7 @@ class UserTest {
     @DisplayName("becomeAdmin нормальная работа")
     @Test
     void becomeAdmin(){
-        User user = new User(id, tgId);
+        User user = new User(tgId);
         Assertions.assertDoesNotThrow(user::becomeAdmin);
         assertTrue(user.isUserAdmin());
     }
@@ -238,7 +220,7 @@ class UserTest {
     @DisplayName("becomeAdmin user уже админ")
     @Test
     void becomeAdminAlreadyAdmin(){
-        User user = new User(id, tgId);
+        User user = new User(tgId);
         user.becomeAdmin();
         assertTrue(user.isUserAdmin());
         IllegalStateException thrown = Assertions.assertThrows(IllegalStateException.class,user::becomeAdmin);
@@ -248,7 +230,7 @@ class UserTest {
     @DisplayName("becomeAdmin нормальная работа")
     @Test
     void becomeNormalUser(){
-        User user = new User(id, tgId);
+        User user = new User(tgId);
         user.becomeAdmin();
         assertTrue(user.isUserAdmin());
         Assertions.assertDoesNotThrow(user::becomeNormalUser);
@@ -257,9 +239,39 @@ class UserTest {
     @DisplayName("becomeAdmin user уже админ")
     @Test
     void becomeNormalUserAlreadyNormalUser(){
-        User user = new User(id, tgId);
+        User user = new User(tgId);
         assertTrue(user.isUserNormalPlayer());
         IllegalStateException thrown = Assertions.assertThrows(IllegalStateException.class,user::becomeNormalUser);
         Assertions.assertEquals("User already normal user", thrown.getMessage());
+    }
+
+    @DisplayName("Конструктор копирования юзера от перегруженного юзера как должно быть")
+    @Test
+    void copyUserExtended(){
+        User u1 = new User(uAddReference);
+        assertEquals(tgId, u1.telegramId);
+        assertEquals(username, u1.getUsername());
+        assertEquals(nickname, u1.getNickname());
+        assertEquals(totalScore, u1.getTotalScore());
+        assertTrue(u1.isUserNormalPlayer());
+    }
+
+    @DisplayName("Конструктор копирования юзера от юзера как должно быть")
+    @Test
+    void copyUserBase(){
+        User u2 = new User(uBaseReference);
+        assertEquals(tgId, u2.telegramId);
+        assertEquals("", u2.getNickname());
+        assertEquals("", u2.getUsername());
+        assertEquals(0, u2.getTotalScore());
+        assertTrue(u2.isUserNormalPlayer());
+    }
+
+    @DisplayName("Конструктор копирования юзера передали null")
+    @Test
+    void copyUserNull(){
+        Assertions.assertThrows(NullPointerException.class, () -> {
+                new User(null);
+        });
     }
 }

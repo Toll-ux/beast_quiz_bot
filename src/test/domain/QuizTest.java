@@ -13,12 +13,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class QuizTest {
 
-    static final List<Question> qtsReference = List.of(new Question(1,"2+2 = ?", List.of("1", "No", "14", "4"), Set.of(3)),
+    final List<Question> qtsReference = List.of(new Question(1,"2+2 = ?", List.of("1", "No", "14", "4"), Set.of(3)),
             new Question(2, "3+3 = ?",  List.of("6", "12/2", "No", "Why"), Set.of(1,2))
     );
 
-    static final int initializedQuestionIndex = 0;
-    static final int initializedScore = 0;
+    final int initializedQuestionIndex = 0;
+    final int initializedScore = 0;
 
     @DisplayName("Конструктор, действительно, что-то инициализирует")
     @Test
