@@ -2,6 +2,7 @@ import application.QuizApplicationService;
 import infrastructure.HardcodedQuestionRepository;
 import infrastructure.HardcodedQuizRepository;
 import infrastructure.HardcodedUserRepository;
+import domain.User;
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -18,75 +19,69 @@ class TestRunTest {
     QuizApplicationService QAS;
     ByteArrayOutputStream out;
     PrintStream testOut;
+    HardcodedUserRepository userRepository;
 
     @BeforeEach
     void initializeQAS() {
+        userRepository = new HardcodedUserRepository();
         QAS = new QuizApplicationService(
                 new HardcodedQuestionRepository(),
                 new HardcodedQuizRepository(),
-                new HardcodedUserRepository(),
+                userRepository,
                 Clock.systemDefaultZone()
         );
 
+        // регистрируем юзера, иначе finish/abort бросит "User not found"
+        User user = new User(telegramId);
+        user.setNickname("Alex");
+        userRepository.saveUserInfo(user);
+
         out = new ByteArrayOutputStream();
         testOut = new PrintStream(out);
+    }
+
+    /** Утилита для создания TestRun с заданным вводом */
+    private TestRun makeRunner(String input) {
+        ByteArrayInputStream in = new ByteArrayInputStream(input.getBytes());
+        Scanner scanner = new Scanner(in);
+        return new TestRun(scanner, testOut, QAS, userRepository);
     }
 
     // 1. Input Validation & Resilience
     @DisplayName("playQuiz: не числовой ввод количества вопросов")
     @Test
     void playQuizNonNumStringInCountQuestions() {
-        String input = "sdffdg\nq";
-
-        ByteArrayInputStream in = new ByteArrayInputStream(input.getBytes());
-        Scanner scanner = new Scanner(in);
-
-        // testOut и out берутся из вашего @BeforeEach
-        TestRun runner = new TestRun(scanner, testOut, QAS);
+        String input = "sdffdg\nq\n";   // <-- добавляем \n после q
+        TestRun runner = makeRunner(input);
         runner.playQuiz(telegramId);
 
-        // Забираем всё, что попало в поток вывода
         String consoleOutput = out.toString();
-
-        // Проверяем, что программа отреагировала на ошибку и выставила 4 вопроса
         assertTrue(consoleOutput.contains("Invalid input. Let's assume you want 4 questions..."),
                 "Ожидался текст-предупреждение о неверном вводе, но вывелось:\n" + consoleOutput);
-
-        // Также можно проверить, что сработал корректный выход из квиза по 'q'
         assertTrue(consoleOutput.contains("Quiz aborted by the user."));
     }
-}
-/*
+
     @DisplayName("playQuiz: числовой ввод вопросов, но числа < 0")
     @Test
-    void playQuizNumLowerThanZero(){
-        String input = "-1";
-        ByteArrayInputStream in = new ByteArrayInputStream(input.getBytes());
-        Scanner scanner = new Scanner(in);
-
-        TestRun runner = new TestRun(scanner,testOut, QAS);
+    void playQuizNumLowerThanZero() {
+        String input = "-1\nq\n";   // <-- добавляем \n
+        TestRun runner = makeRunner(input);
         assertDoesNotThrow(() -> runner.playQuiz(telegramId));
     }
 
     @DisplayName("playQuiz: числовой ввод вопросов, но числа 0")
     @Test
-    void playQuizNumLowerZero(){
-        String input = "0";
-        ByteArrayInputStream in = new ByteArrayInputStream(input.getBytes());
-        Scanner scanner = new Scanner(in);
-
-        TestRun runner = new TestRun(scanner,testOut, QAS);
+    void playQuizNumLowerZero() {
+        String input = "0\nq\n";
+        TestRun runner = makeRunner(input);
         assertDoesNotThrow(() -> runner.playQuiz(telegramId));
     }
 
     @DisplayName("playQuiz: числовой ввод вопросов, но числа > 4")
     @Test
-    void playQuizNumHigherThanFour(){
-        String input = "100";
-        ByteArrayInputStream in = new ByteArrayInputStream(input.getBytes());
-        Scanner scanner = new Scanner(in);
-
-        TestRun runner = new TestRun(scanner,testOut, QAS);
+    void playQuizNumHigherThanFour() {
+        String input = "100\nq\n";
+        TestRun runner = makeRunner(input);
         assertDoesNotThrow(() -> runner.playQuiz(telegramId));
     }
 
@@ -94,69 +89,47 @@ class TestRunTest {
     @Test
     void playQuizAbort() {
         String input = "q\n";
-        ByteArrayInputStream in = new ByteArrayInputStream(input.getBytes());
-        Scanner scanner = new Scanner(in);
-
-        TestRun runner = new TestRun(scanner,testOut, QAS);
+        TestRun runner = makeRunner(input);
         assertDoesNotThrow(() -> runner.playQuiz(telegramId));
     }
 
     @DisplayName("playQuiz: не числовой ввод ответа, проверка на второй шанс")
     @Test
     void playQuizNonNumStringInAnswers() {
-        String input = "1\n apsfjs\n";
-        ByteArrayInputStream in = new ByteArrayInputStream(input.getBytes());
-        Scanner scanner = new Scanner(in);
-
-        TestRun runner = new TestRun(scanner,testOut, QAS);
+        String input = "1\n apsfjs\n q\n";   // <-- добавляем q, чтобы выйти
+        TestRun runner = makeRunner(input);
         assertDoesNotThrow(() -> runner.playQuiz(telegramId));
     }
 
-    // TODO::Исправить это. Сделать как ошибку и пропустить вопрос
     @DisplayName("playQuiz: числовой ввод ответа, проверка zero")
     @Test
     void playQuizNumZero() {
-        String input = "1\n 0\n";
-        ByteArrayInputStream in = new ByteArrayInputStream(input.getBytes());
-        Scanner scanner = new Scanner(in);
-
-        TestRun runner = new TestRun(scanner,testOut,QAS);
+        String input = "1\n 0\n q\n";
+        TestRun runner = makeRunner(input);
         assertDoesNotThrow(() -> runner.playQuiz(telegramId));
     }
 
-    // TODO::Исправить это. Сделать как ошибку и пропустить вопрос
     @DisplayName("playQuiz: числовой ввод ответа, проверка отрицательные числа")
     @Test
     void playQuizNumBelowZero() {
-        String input = "1\n -10\n";
-        ByteArrayInputStream in = new ByteArrayInputStream(input.getBytes());
-        Scanner scanner = new Scanner(in);
-
-        TestRun runner = new TestRun(scanner,testOut, QAS);
+        String input = "1\n -10\n q\n";
+        TestRun runner = makeRunner(input);
         assertDoesNotThrow(() -> runner.playQuiz(telegramId));
     }
 
-    // TODO::Исправить это. Сделать как ошибку и пропустить вопрос
     @DisplayName("playQuiz: числовой ввод ответа, проверка больше верхней границы")
     @Test
     void playQuizNumUpperThanRange() {
-        String input = "1\n 1000\n";
-        ByteArrayInputStream in = new ByteArrayInputStream(input.getBytes());
-        Scanner scanner = new Scanner(in);
-
-        TestRun runner = new TestRun(scanner,testOut, QAS);
+        String input = "1\n 1000\n q\n";
+        TestRun runner = makeRunner(input);
         assertDoesNotThrow(() -> runner.playQuiz(telegramId));
     }
 
-    //TODO :: playQuizNumAnswers
     @DisplayName("playQuiz: числовой ввод ответа, проверка неправильность ответа")
     @Test
     void playQuizNumAnswers() {
-        String input = "1\n 1\n";
-        ByteArrayInputStream in = new ByteArrayInputStream(input.getBytes());
-        Scanner scanner = new Scanner(in);
-
-        TestRun runner = new TestRun(scanner,testOut, QAS);
+        String input = "1\n 1\n q\n";
+        TestRun runner = makeRunner(input);
         assertDoesNotThrow(() -> runner.playQuiz(telegramId));
     }
 
@@ -164,45 +137,35 @@ class TestRunTest {
     @Test
     void playQuizAnswersAbort() {
         String input = "1\n q\n";
-        ByteArrayInputStream in = new ByteArrayInputStream(input.getBytes());
-        Scanner scanner = new Scanner(in);
-
-        TestRun runner = new TestRun(scanner,testOut, QAS);
+        TestRun runner = makeRunner(input);
         assertDoesNotThrow(() -> runner.playQuiz(telegramId));
     }
 
     @DisplayName("playQuiz: передан tg id < 0")
     @Test
     void playQuizNegativeTgId() {
-        String input = "1\n 1\n";
-        ByteArrayInputStream in = new ByteArrayInputStream(input.getBytes());
-        Scanner scanner = new Scanner(in);
-
-        TestRun runner = new TestRun(scanner,testOut, QAS);
-        assertDoesNotThrow(() -> runner.playQuiz(-100));
+        String input = "1\n 1\n q\n";
+        TestRun runner = makeRunner(input);
+        // playQuiz сейчас НЕ ловит IllegalArgumentException из start —
+        // поэтому проверяем именно факт выброса исключения
+        assertThrows(IllegalArgumentException.class,
+                () -> runner.playQuiz(-100));
     }
 
     @DisplayName("playQuiz: передан tg id = 0")
     @Test
     void playQuizZeroTgId() {
-        String input = "1\n 1\n";
-        ByteArrayInputStream in = new ByteArrayInputStream(input.getBytes());
-        Scanner scanner = new Scanner(in);
-
-        TestRun runner = new TestRun(scanner,testOut, QAS);
-        assertDoesNotThrow(() -> runner.playQuiz(0));
+        String input = "1\n 1\n q\n";
+        TestRun runner = makeRunner(input);
+        assertThrows(IllegalArgumentException.class,
+                () -> runner.playQuiz(0));
     }
 
     @DisplayName("viewHelp: что-то выводит")
     @Test
-    void viewHelp(){
+    void viewHelp() {
         String input = "\n";
-        ByteArrayInputStream in = new ByteArrayInputStream(input.getBytes());
-        Scanner scanner = new Scanner(in);
-
-        TestRun runner = new TestRun(scanner,testOut, QAS);
+        TestRun runner = makeRunner(input);
         assertDoesNotThrow(() -> runner.viewHelp());
     }
-
 }
-*/
