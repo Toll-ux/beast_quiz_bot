@@ -67,9 +67,8 @@ public class AnswerQuestion
 
         /* Смотрим, был ли текущий вопрос последним */
         int nextIndex = quiz.getCurrentQuestionIndex() + 1;
-        if (nextIndex >= quiz.getQuestions().size())
+        if ((nextIndex >= quiz.getQuestions().size()) || (nextIndex < quiz.getCurrentQuestionIndex())) //На случай оверфлоу - закрываем квиз
         {
-            quiz.finish();
             finished = true;
         } else {
             quiz.nextQuestion();
