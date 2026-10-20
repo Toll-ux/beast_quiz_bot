@@ -20,7 +20,7 @@ class TestRunTest {
     PrintStream testOut;
 
     @BeforeEach
-    void initializeQAS(){
+    void initializeQAS() {
         QAS = new QuizApplicationService(
                 new HardcodedQuestionRepository(),
                 new HardcodedQuizRepository(),
@@ -35,7 +35,7 @@ class TestRunTest {
     // 1. Input Validation & Resilience
     @DisplayName("playQuiz: не числовой ввод количества вопросов")
     @Test
-    void playQuizNonNumStringInCountQuestions(){
+    void playQuizNonNumStringInCountQuestions() {
         String input = "sdffdg\nq";
 
         ByteArrayInputStream in = new ByteArrayInputStream(input.getBytes());
@@ -55,6 +55,7 @@ class TestRunTest {
         // Также можно проверить, что сработал корректный выход из квиза по 'q'
         assertTrue(consoleOutput.contains("Quiz aborted by the user."));
     }
+}
 /*
     @DisplayName("playQuiz: числовой ввод вопросов, но числа < 0")
     @Test
@@ -203,5 +204,5 @@ class TestRunTest {
         assertDoesNotThrow(() -> runner.viewHelp());
     }
 
- */
 }
+*/

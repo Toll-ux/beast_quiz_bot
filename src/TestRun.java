@@ -18,11 +18,13 @@ public class TestRun
     private final Scanner scanner;
     private final PrintStream out;
     private final QuizApplicationService QAS;
+    HardcodedUserRepository userRepo;
 
-    public TestRun(Scanner scanner, PrintStream out, QuizApplicationService QAS) {
+    public TestRun(Scanner scanner, PrintStream out, QuizApplicationService QAS, HardcodedUserRepository userRepo) {
         this.scanner = scanner;
         this.out = out;
         this.QAS = QAS;
+        this.userRepo = userRepo;
     }
 
     /** playQuiz - функция для игры в квиз
@@ -80,7 +82,7 @@ public class TestRun
             if (line.trim().equalsIgnoreCase("q")) {
                 QAS.abort(telegramId);
                 out.println("Quiz aborted by the user.");
-                break;
+                return;
             }
 
             Set<Integer> numbers;
@@ -160,14 +162,16 @@ public class TestRun
     /** main - инициализация экземпляра, запуск*/
     public static void main(String[] args) {
         // создание экземпляра
+        HardcodedUserRepository userRepo = new HardcodedUserRepository();
         Scanner scanner = new Scanner(System.in);
         QuizApplicationService QAS = new QuizApplicationService(
                 new HardcodedQuestionRepository(),
                 new HardcodedQuizRepository(),
-                new HardcodedUserRepository(),
+                userRepo,
                 Clock.systemDefaultZone()
         );
-        TestRun runner = new TestRun(scanner, System.out, QAS);
+
+        TestRun runner = new TestRun(scanner, System.out, QAS, userRepo);
         runner.run();
     }
 
@@ -188,7 +192,7 @@ public class TestRun
         // создание юзера
         User user = new User(telegramId);
         user.setNickname(nickname);
-
+        userRepo.saveUserInfo(user);
         // цикл с игрой
         while(true) {
             out.println("""
