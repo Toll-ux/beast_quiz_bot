@@ -18,13 +18,11 @@ public class TestRun
     private final Scanner scanner;
     private final PrintStream out;
     private final QuizApplicationService QAS;
-    HardcodedUserRepository userRepo;
 
     public TestRun(Scanner scanner, PrintStream out, QuizApplicationService QAS, HardcodedUserRepository userRepo) {
         this.scanner = scanner;
         this.out = out;
         this.QAS = QAS;
-        this.userRepo = userRepo;
     }
 
     /** playQuiz - функция для игры в квиз
@@ -154,9 +152,8 @@ public class TestRun
     /**viewHelp - функция чтобы посмотреть возможности бота*/
     public void viewHelp(){
         out.println("""
-                Бот может все;
+                
                 """);
-        // TODO ::  viewHelp - функция чтобы посмотреть возможности бота
     }
 
     /** main - инициализация экземпляра, запуск*/
@@ -192,7 +189,7 @@ public class TestRun
         // создание юзера
         User user = new User(telegramId);
         user.setNickname(nickname);
-        userRepo.saveUserInfo(user);
+
         // цикл с игрой
         while(true) {
             out.println("""
