@@ -8,11 +8,10 @@ import org.junit.jupiter.api.Test;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-
-import static org.junit.jupiter.api.Assertions.*;
 
 //Проверяет публичные методы сервисов, которые они используют внутри себя
 public class QuizApplicationServiceTest {
@@ -27,6 +26,9 @@ public class QuizApplicationServiceTest {
 
     final long telegramId = 20;
     int questionsCount = 2;
+
+    String username = "@test_user";
+    String nickname = "Test_user";
 
     private QuizApplicationService createService() {
         return new QuizApplicationService(
@@ -107,14 +109,14 @@ public class QuizApplicationServiceTest {
                 "Не должна создаваться вторая сессия");
     }
 
-    @DisplayName("PresentQuestion: нормальная работа")
+    @DisplayName("presentQuestion: нормальная работа")
     @Test
-    void PresentQuestionNormal() {
+    void presentQuestionNormal() {
         QuizApplicationService service = createService();
         QuizSession session = startQuiz(service);
         Quiz quiz = session.quiz();
 
-        QuestionView questionView = service.PresentQuestion(telegramId);
+        QuestionView questionView = service.presentQuestion(telegramId);
 
         Question currentQuestion = quiz.getQuestions().get(quiz.getCurrentQuestionIndex());
 
@@ -123,9 +125,9 @@ public class QuizApplicationServiceTest {
         assertEquals(currentQuestion.answers(), questionView.answers());
     }
 
-    @DisplayName("PresentQuestion: нет активного квиза")
+    @DisplayName("presentQuestion: нет активного квиза")
     @Test
-    void PresentQuestionWithoutActiveQuiz() {
+    void presentQuestionWithoutActiveQuiz() {
         QuizApplicationService service = createService();
         IllegalStateException thrown = assertThrows(
                 IllegalStateException.class,
@@ -386,6 +388,61 @@ public class QuizApplicationServiceTest {
 
         assertEquals(
                 "No active quiz for user with tg id: " + telegramId,
+                thrown.getMessage()
+        );
+    }
+
+    @DisplayName("getLeaderBoard: возвращает непустой список LeaderboardEntry")
+    @Test
+    void getLeaderBoardNormal() {
+        QuizApplicationService service = createService();
+
+        User user = new User(telegramId,username, nickname, 100);
+        userRepo.saveUserInfo(user);
+
+        List<LeaderboardEntry> result = service.getLeaderBoard(telegramId);
+
+        assertNotNull(result);
+        assertFalse(result.isEmpty());
+
+        assertTrue(result.contains(
+                new LeaderboardEntry(1, 100, nickname)
+        ));
+    }
+
+    @DisplayName("getLeaderBoard: пустая база данных")
+    @Test
+    void getLeaderBoardEmptyDatabase() {
+        QuizApplicationService service = createService();
+
+        IllegalStateException thrown = assertThrows(
+                IllegalStateException.class,
+                () -> service.getLeaderBoard(telegramId)
+        );
+
+        assertEquals(
+                "Leaderboard data is missing or database is empty",
+                thrown.getMessage()
+        );
+    }
+
+    @DisplayName("getLeaderBoard: пользователь отсутствует в базе данных")
+    @Test
+    void getLeaderBoardUserNotFound() {
+        QuizApplicationService service = createService();
+
+        // Топ 10 не пуст, но искомого пользователя нет.
+        userRepo.saveUserInfo(
+                new User(30, "@other_user", "OtherUser", 50)
+        );
+
+        IllegalStateException thrown = assertThrows(
+                IllegalStateException.class,
+                () -> service.getLeaderBoard(telegramId)
+        );
+
+        assertEquals(
+                "User slice data is missing or database is empty",
                 thrown.getMessage()
         );
     }
