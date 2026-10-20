@@ -15,7 +15,7 @@ import java.util.Optional;
 
 
 public class AnswerQuestionTest {
-    
+    final FakeUserRepo userRepo = new FakeUserRepo();
     final FakeQuestionRepo questionRepo = new FakeQuestionRepo();
     final FakeQuizRepo quizRepo = new FakeQuizRepo();
 
@@ -60,7 +60,7 @@ public class AnswerQuestionTest {
     @DisplayName("execute: получил question id = 0")
     @Test
     void executeZeroQuestionId(){
-        StartQuiz sq = new StartQuiz(questionRepo, quizRepo, clock);
+        StartQuiz sq = new StartQuiz(userRepo, questionRepo, quizRepo, clock);
         sq.execute(telegramId, questionsCount);
 
         AnswerQuestion aq = new AnswerQuestion(quizRepo);
@@ -74,7 +74,7 @@ public class AnswerQuestionTest {
     @DisplayName("execute: получил question id < 0")
     @Test
     void executeNegativeQuestionId(){
-        StartQuiz sq = new StartQuiz(questionRepo, quizRepo, clock);
+        StartQuiz sq = new StartQuiz(userRepo, questionRepo, quizRepo, clock);
         sq.execute(telegramId, questionsCount);
 
         AnswerQuestion aq = new AnswerQuestion(quizRepo);
@@ -88,7 +88,7 @@ public class AnswerQuestionTest {
     @DisplayName("execute: получил в selected answers пустое множество")
     @Test
     void executeEmptySelectedAnswers(){
-        StartQuiz sq = new StartQuiz(questionRepo, quizRepo, clock);
+        StartQuiz sq = new StartQuiz(userRepo, questionRepo, quizRepo, clock);
         sq.execute(telegramId, questionsCount);
 
         AnswerQuestion aq = new AnswerQuestion(quizRepo);
@@ -102,7 +102,7 @@ public class AnswerQuestionTest {
     @DisplayName("execute: получил selected answers null")
     @Test
     void executeNullSelectedAnswers(){
-        StartQuiz sq = new StartQuiz(questionRepo, quizRepo, clock);
+        StartQuiz sq = new StartQuiz(userRepo, questionRepo, quizRepo, clock);
         sq.execute(telegramId, questionsCount);
 
         AnswerQuestion aq = new AnswerQuestion(quizRepo);
@@ -116,7 +116,7 @@ public class AnswerQuestionTest {
     @DisplayName("execute: пользователь дал верный ответ на 1 вопрос")
     @Test
     void execute(){
-        StartQuiz sq = new StartQuiz(questionRepo, quizRepo, clock);
+        StartQuiz sq = new StartQuiz(userRepo, questionRepo, quizRepo, clock);
         sq.execute(telegramId, questionsCount);
 
         AnswerQuestion aq = new AnswerQuestion(quizRepo);
@@ -138,7 +138,7 @@ public class AnswerQuestionTest {
     @Test
     void executeWithIncorrectAnswer(){
         GetCurrentQuestionView gq = new GetCurrentQuestionView(quizRepo);
-        StartQuiz sq = new StartQuiz(questionRepo, quizRepo, clock);
+        StartQuiz sq = new StartQuiz(userRepo, questionRepo, quizRepo, clock);
         sq.execute(telegramId, questionsCount);
 
         AnswerQuestion aq = new AnswerQuestion(quizRepo);
@@ -187,7 +187,7 @@ public class AnswerQuestionTest {
     @DisplayName("execute: ответ не на тот вопрос (нарушение последовательности)")
     @Test
     void executeWithWrongQuestionIdThrowsException() {
-        StartQuiz sq = new StartQuiz(questionRepo, quizRepo, clock);
+        StartQuiz sq = new StartQuiz(userRepo, questionRepo, quizRepo, clock);
         sq.execute(telegramId, questionsCount);
         AnswerQuestion aq = new AnswerQuestion(quizRepo);
 
@@ -207,7 +207,7 @@ public class AnswerQuestionTest {
     void executeTreeQuestions(){
         int totalQuestions = 3;
 
-        StartQuiz sq = new StartQuiz(questionRepo, quizRepo, clock);
+        StartQuiz sq = new StartQuiz(userRepo, questionRepo, quizRepo, clock);
         sq.execute(telegramId, totalQuestions);
 
         GetCurrentQuestionView gq = new GetCurrentQuestionView(quizRepo);
