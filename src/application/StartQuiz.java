@@ -39,6 +39,17 @@ public class StartQuiz
      */
     public boolean execute(long telegramId, int questionsCount)
     {
+        if (telegramId <= 0)
+            throw new IllegalArgumentException("Telegram id must be positive");
+
+        // Проверяем, есть ли юзер в репозитории. Если нет - создаем
+        Optional<User> maybeUser = userRepository.findUserByTelegramId(telegramId);
+        if (maybeUser.isEmpty())
+        {
+            User newUser = new User(telegramId);
+            userRepository.saveUserInfo(newUser);
+        }
+
         // Проверяем, есть ли у юзера незаконченный квиз. Если есть, новый не создаем
         Optional<QuizSession> maybeLastQuizSession = quizRepository.findQuizSessionByTelegramId(telegramId);
         if (maybeLastQuizSession.isPresent())
@@ -57,9 +68,6 @@ public class StartQuiz
                 return false;
             }
         }
-
-        if (telegramId <= 0)
-            throw new IllegalArgumentException("Telegram id must be positive");
 
         if (questionsCount <=0)
         {
