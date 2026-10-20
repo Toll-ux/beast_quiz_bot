@@ -39,14 +39,6 @@ public class StartQuiz
      */
     public boolean execute(long telegramId, int questionsCount)
     {
-        // Проверяем, есть ли юзер в репозитории. Если нет - создаем
-        Optional<User> maybeUser = userRepository.findUserByTelegramId(telegramId);
-        if (maybeUser.isEmpty())
-        {
-            User newUser = new User((int) telegramId, telegramId,"Anonymous",  "Anonymous", 0);
-            userRepository.saveUserInfo(newUser);
-        }
-
         // Проверяем, есть ли у юзера незаконченный квиз. Если есть, новый не создаем
         Optional<QuizSession> maybeLastQuizSession = quizRepository.findQuizSessionByTelegramId(telegramId);
         if (maybeLastQuizSession.isPresent())
@@ -66,13 +58,16 @@ public class StartQuiz
             }
         }
 
+        if (telegramId <= 0)
+            throw new IllegalArgumentException("Telegram id must be positive");
+
         if (questionsCount <=0)
         {
             throw new IllegalArgumentException("questionCount must be positive");
         }
         // ищем вопросы
         List<Question> questions = questionRepository.findRandomQuestions(questionsCount);
-        if (questions.isEmpty()) {
+        if (questions == null || questions.isEmpty()) {
             throw new IllegalStateException("question list is empty");
         }
 
@@ -96,6 +91,6 @@ public class StartQuiz
      */
     public int generateSessionId()
     {
-        return (int) (clock.millis() % Integer.MAX_VALUE);
+        return (int) ((clock.millis() % Integer.MAX_VALUE) & 0x7FFFFFFF);
     }
 }
