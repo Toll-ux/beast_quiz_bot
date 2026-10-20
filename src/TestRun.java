@@ -4,6 +4,7 @@ import infrastructure.HardcodedQuizRepository;
 import infrastructure.HardcodedUserRepository;
 import domain.User;
 
+import java.io.PrintStream;
 import java.time.Clock;
 import java.util.Arrays;
 import java.util.List;
@@ -15,10 +16,12 @@ import java.util.stream.Collectors;
 public class TestRun
 {
     private final Scanner scanner;
+    private final PrintStream out;
     private final QuizApplicationService QAS;
 
-    public TestRun(Scanner scanner, QuizApplicationService QAS) {
+    public TestRun(Scanner scanner, PrintStream out, QuizApplicationService QAS) {
         this.scanner = scanner;
+        this.out = out;
         this.QAS = QAS;
     }
 
@@ -27,12 +30,12 @@ public class TestRun
      * @param telegramId - тг id юзера
      */
     public void playQuiz(long telegramId){
-        IO.println("Please enter the desired quiz length (currently support 1-4 questions) or 'q' to abort: ");
+        out.println("Please enter the desired quiz length (currently support 1-4 questions) or 'q' to abort: ");
 
         // ввод количества вопросов
         String lengthInput = scanner.nextLine().trim();
         if (lengthInput.equalsIgnoreCase("q")) {
-            IO.println("Quiz aborted by the user.");
+            out.println("Quiz aborted by the user.");
             return;
         }
 
@@ -41,13 +44,13 @@ public class TestRun
         try {
             questionCount = Integer.parseInt(lengthInput);
         } catch (NumberFormatException e) {
-            IO.println("Invalid input. Let's assume you want 4 questions...");
+            out.println("Invalid input. Let's assume you want 4 questions...");
             questionCount = 4;
         }
 
         // Проверка на адекватность questionCount
         if ((questionCount > 4) || (questionCount < 1)){
-            IO.println("Come on, bro... let's assume you want 4 questions...");
+            out.println("Come on, bro... let's assume you want 4 questions...");
             questionCount = 4;
         }
 
@@ -59,24 +62,24 @@ public class TestRun
             // текущий вопрос
             QuestionView currentQuestionView = QAS.presentQuestion(telegramId);
 
-            IO.println(currentQuestionView.text());
+            out.println(currentQuestionView.text());
 
             // печать ответов
             List<String> answers = currentQuestionView.answers();
             for (int i = 0; i < answers.size(); i++) {
-                System.out.println((i + 1) + ": " + answers.get(i));
+                out.println((i + 1) + ": " + answers.get(i));
             }
 
 
-            IO.println("Please enter numbers representing your answer (possibly multiple choice) in one single line");
-            IO.println("Press 'q' to abort the quiz.");
+            out.println("Please enter numbers representing your answer (possibly multiple choice) in one single line");
+            out.println("Press 'q' to abort the quiz.");
             // ввод ответа
             String line = scanner.nextLine();
 
             // если там q - выход
             if (line.trim().equalsIgnoreCase("q")) {
                 QAS.abort(telegramId);
-                IO.println("Quiz aborted by the user.");
+                out.println("Quiz aborted by the user.");
                 break;
             }
 
@@ -87,7 +90,7 @@ public class TestRun
                         .map(Integer::parseInt).map(n -> n - 1)
                         .collect(Collectors.toSet());
             } catch (NumberFormatException e){
-                IO.println("I think. I’ll overlook the typo");
+                out.println("I think. I’ll overlook the typo");
                 continue;
             }
 
@@ -98,10 +101,10 @@ public class TestRun
 
             // вывод итогов
             if(result.correct()){
-                IO.println("Good job, you answered correctly!");
+                out.println("Good job, you answered correctly!");
             } else {
-                IO.println("You are objectively wrong, the correct answers were: ");
-                result.correctAnswers().stream().map(n -> n + 1).forEach(System.out::println);
+                out.println("You are objectively wrong, the correct answers were: ");
+                result.correctAnswers().stream().map(n -> n + 1).forEach(out::println);
             }
 
             // если квиз закончен - выход из цикла
@@ -111,8 +114,7 @@ public class TestRun
         }
         // Квиз закончен запись счета в репозитории и др.
         FinishQuizResult finishedQuiz = QAS.finish(telegramId);
-        IO.println("Nicely done! Your total score was: " + finishedQuiz.quizScore());
-
+        out.println("Nicely done! Your total score was: " + finishedQuiz.quizScore());
     }
 
     /** viewLeaderboard - функция, чтобы посмотреть квиз
@@ -126,7 +128,7 @@ public class TestRun
         try {
             leaderBoard = QAS.getLeaderBoard(telegramId);
         } catch (IllegalStateException e) {
-            IO.println("Apparently " + e +".\n" + "That means you can be first in our repository!");
+            out.println("Apparently " + e +".\n" + "That means you can be first in our repository!");
             return;
         }
 
@@ -144,14 +146,15 @@ public class TestRun
         }
         sb.append("---------------------------\n");
 
-        IO.println(sb.toString());
+        out.println(sb.toString());
     }
 
     /**viewHelp - функция чтобы посмотреть возможности бота*/
     public void viewHelp(){
-        IO.println("""
+        out.println("""
                 Бот может все;
                 """);
+        // TODO ::  viewHelp - функция чтобы посмотреть возможности бота
     }
 
     /** main - инициализация экземпляра, запуск*/
@@ -164,21 +167,21 @@ public class TestRun
                 new HardcodedUserRepository(),
                 Clock.systemDefaultZone()
         );
-        TestRun runner = new TestRun(scanner, QAS);
+        TestRun runner = new TestRun(scanner, System.out, QAS);
         runner.run();
     }
 
     /** run -  */
     public void run() {
-        IO.println("Hello and welcome to our Quiz-bot!");
+        out.println("Hello and welcome to our Quiz-bot!");
 
         // ввод tg id, сейчас он захардкожен
-        //IO.println("Enter your Telegram ID:");
+        //out.println("Enter your Telegram ID:");
         //long telegramId = Long.parseLong(scanner.nextLine().trim());
         long telegramId = 1;
 
         // ввод nickname он нужен для красивого вывода leaderboard сейчас захардкожен
-        //IO.println("Enter your nickname:");
+        //out.println("Enter your nickname:");
         //String nickname = scanner.nextLine().trim();
         String nickname = "Alex";
 
@@ -188,7 +191,7 @@ public class TestRun
 
         // цикл с игрой
         while(true) {
-            IO.println("""
+            out.println("""
                 Choose an action:
                 p — play quiz
                 l — show leaderboard
@@ -203,10 +206,10 @@ public class TestRun
                 case "l" -> viewLeaderboard(telegramId);
                 case "h" -> viewHelp();
                 case "q" -> {
-                    IO.println("So long, losers, whom I've always hated! © Bender Bending Rodríguez");
+                    out.println("So long, losers, whom I've always hated! © Bender Bending Rodríguez");
                     return;
                 }
-                default -> IO.println("Unknown command. Please enter p, s, h, or q.");
+                default -> out.println("Unknown command. Please enter p, s, h, or q.");
             }
         }
     }
