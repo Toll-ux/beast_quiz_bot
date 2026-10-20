@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class GetCurrentQuestionViewTest
 {
-
+    final FakeUserRepo userRepo = new FakeUserRepo();
     final FakeQuizRepo quizRepo = new FakeQuizRepo();
     final FakeQuestionRepo questionRepo = new FakeQuestionRepo();
 
@@ -77,7 +77,7 @@ public class GetCurrentQuestionViewTest
     @Test
     void executeReturnsCurrentQuestionView()
     {
-        StartQuiz sq = new StartQuiz(questionRepo, quizRepo, clock);
+        StartQuiz sq = new StartQuiz(userRepo, questionRepo, quizRepo, clock);
         sq.execute(telegramId, questionCount);
 
         QuestionView view = getQuestion.execute(telegramId);
@@ -95,7 +95,7 @@ public class GetCurrentQuestionViewTest
     @Test
     void executeReturnsQuestionViewAtCurrentIndex()
     {
-        StartQuiz sq = new StartQuiz(questionRepo, quizRepo, clock);
+        StartQuiz sq = new StartQuiz(userRepo, questionRepo, quizRepo, clock);
         sq.execute(telegramId, 3);
 
         // продвигаем сессию к последнему вопросу
@@ -119,7 +119,7 @@ public class GetCurrentQuestionViewTest
     @Test
     void executeDoesNotChangeQuizSession()
     {
-        StartQuiz sq = new StartQuiz(questionRepo, quizRepo, clock);
+        StartQuiz sq = new StartQuiz(userRepo, questionRepo, quizRepo, clock);
         sq.execute(telegramId, questionCount);
 
         QuizSession before = quizRepo.findQuizSessionByTelegramId(telegramId).orElseThrow();
