@@ -46,7 +46,7 @@ public class StartQuiz
         Optional<User> maybeUser = userRepository.findUserByTelegramId(telegramId);
         if (maybeUser.isEmpty())
         {
-            User newUser = new User(telegramId);
+            User newUser = new User(telegramId, "@Anonymous", "Anonymous", 0);
             userRepository.saveUserInfo(newUser);
         }
 
