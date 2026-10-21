@@ -122,8 +122,8 @@ class UserTest {
     @Test
     void updateTotalScoreSameRes () {
         User user = new User(tgId, username, nickname, totalScore);
-        user.updateTotalScore(totalScore);
-        assertEquals(totalScore, user.getTotalScore());
+        user.updateTotalScore(10);
+        assertEquals(totalScore + 10, user.getTotalScore());
     }
 
     @DisplayName("setUsername нормально работает")
