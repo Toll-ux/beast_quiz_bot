@@ -88,7 +88,7 @@ public class User {
             throw new IllegalArgumentException("Score cannot be negative");
         }
 
-        this.totalScore = Math.max(this.totalScore, score);
+        this.totalScore = this.totalScore + score;
     }
 
     /**Функция делает юзера админом. Без проверок
