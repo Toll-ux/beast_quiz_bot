@@ -86,9 +86,15 @@ public class TestRun
             Set<Integer> numbers;
             // адекватность ввода ответа
             try {
-                numbers = Arrays.stream(line.trim().split("\\s+"))
-                        .map(Integer::parseInt).map(n -> n - 1)
+                numbers = Arrays.stream(line.split(""))
+                        .filter(s -> s.matches("\\d+"))
+                        .map(Integer::parseInt)
+                        .map(n -> n - 1)
                         .collect(Collectors.toSet());
+
+                if (numbers.isEmpty()) {
+                    throw new NumberFormatException("No digits found");
+                }
             } catch (NumberFormatException e){
                 out.println("I think. I’ll overlook the typo");
                 continue;
