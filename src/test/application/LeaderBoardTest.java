@@ -1,6 +1,7 @@
-package application;
+package test.application;
 
 import domain.User;
+import application.*;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

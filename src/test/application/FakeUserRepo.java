@@ -1,5 +1,6 @@
-package application;
+package test.application;
 
+import application.*;
 import application.port.UserRepository;
 import domain.User;
 

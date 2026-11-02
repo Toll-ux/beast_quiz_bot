@@ -132,7 +132,7 @@ public class HardcodedUserRepository implements UserRepository {
 
     /**  метод для тестов
     */
-    Map<Long, User> usersForTest() {
+    public Map<Long, User> usersForTest() {
         return users;
     }
 }

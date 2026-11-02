@@ -1,7 +1,8 @@
-package infrastructure;
+package test.infrastructure;
 
-import application.LeaderboardEntry;
-import domain.User;
+import infrastructure.*;
+import application.*;
+import domain.*;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
