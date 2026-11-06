@@ -4,17 +4,64 @@
          http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
+    <!-->механизм наследования конфигурации в maven от spring-boot<-->
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>4.1.2</version>
+    </parent>
+
+    <!-->Общие сведения  проекта<-->
     <groupId>com.example</groupId>
     <artifactId>beast_quiz_bot</artifactId>
     <version>1.0-SNAPSHOT</version>
     <name>beast_quiz_bot</name>
 
+    <!-->Группа обновленных библиотек, из-за которых опасность взлома была 9.8<-->
+    <dependencyManagement>
+        <dependencies>
+
+            <dependency>
+                <groupId>tools.jackson.core</groupId>
+                <artifactId>jackson-core</artifactId>
+                <version>3.2.4</version> <!-- или 3.1.8 -->
+            </dependency>
+            <dependency>
+                <groupId>tools.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
+                <version>3.2.4</version> <!-- или 3.1.8 -->
+            </dependency>
+
+            <dependency>
+                <groupId>ch.qos.logback</groupId>
+                <artifactId>logback-classic</artifactId>
+                <version>1.6.6</version>
+            </dependency>
+
+            <dependency>
+                <groupId>ch.qos.logback</groupId>
+                <artifactId>logback-core</artifactId>
+                <version>1.6.6</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <!-->Сторонние библиотеки<-->
     <dependencies>
+        <!-->spring-boot зависимость для http<-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webmvc</artifactId>
+        </dependency>
+
+        <!-->junit-jupiter тесты<-->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
             <version>5.11.3</version>
         </dependency>
+
+        <!-->junit-jupiter-params тесты с параметрами<-->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-params</artifactId>
@@ -22,13 +69,17 @@
         </dependency>
     </dependencies>
 
+    <!-->характеристика проекта<-->
     <build>
+        <!-->основная директория<-->
         <sourceDirectory>src</sourceDirectory>
+        <!-->характеристики maven<-->
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.13.0</version>
+                <!-->версия java<-->
                 <configuration>
                     <release>25</release>
                 </configuration>
