@@ -1,4 +1,4 @@
-package test.infrastructure;
+package infrastructure;
 
 import application.QuizSession;
 import domain.Question;

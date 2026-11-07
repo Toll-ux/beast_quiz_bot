@@ -1,4 +1,4 @@
-package test.application;
+package application;
 
 import domain.User;
 import application.*;

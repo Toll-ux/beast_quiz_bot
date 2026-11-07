@@ -1,4 +1,4 @@
-package test.main;
+package main;
 
 import application.QuizApplicationService;
 import infrastructure.HardcodedQuestionRepository;

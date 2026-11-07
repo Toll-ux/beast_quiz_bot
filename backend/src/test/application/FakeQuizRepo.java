@@ -1,4 +1,4 @@
-package test.application;
+package application;
 
 import application.port.QuizRepository;
 import application.QuizSession;

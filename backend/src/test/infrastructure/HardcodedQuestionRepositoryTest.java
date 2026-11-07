@@ -1,4 +1,4 @@
-package test.infrastructure;
+package infrastructure;
 
 import infrastructure.HardcodedQuestionRepository;
 import org.junit.jupiter.api.DisplayName;

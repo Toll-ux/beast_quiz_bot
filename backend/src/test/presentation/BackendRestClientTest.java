@@ -1,4 +1,4 @@
-package test.presentation;
+package presentation;
 
 class BackendRestClientTest {
 

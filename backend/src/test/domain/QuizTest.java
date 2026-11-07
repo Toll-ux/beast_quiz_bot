@@ -1,4 +1,4 @@
-package test.domain;
+package domain;
 
 import domain.Question;
 import domain.Quiz;
