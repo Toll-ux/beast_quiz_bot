@@ -20,6 +20,13 @@
     <!-->Группа обновленных библиотек, из-за которых опасность взлома была 9.8<-->
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>org.junit</groupId>
+                <artifactId>junit-bom</artifactId>
+                <version>5.11.3</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
 
             <dependency>
                 <groupId>tools.jackson.core</groupId>
