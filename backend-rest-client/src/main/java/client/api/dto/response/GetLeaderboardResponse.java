@@ -1,4 +1,4 @@
-package presentation.dto.response;
+package client.api.dto.response;
 
 import java.util.List;
 

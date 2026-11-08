@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="
+         http://maven.apache.org/POM/4.0.0
+         https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+<!--    Версия SpringBoot возможно потребует редактирования-->
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.5.7</version>
+        <relativePath/>
+    </parent>
+
+<!--    groupId можно поменять на com.quizbot, пока оставлено так-->
+    <groupId>com.quizbot</groupId>
+    <artifactId>beast-quiz-bot</artifactId>
+    <version>1.0-SNAPSHOT</version>
+
+<!--    Тип Maven-проекта. Значение pom означает, что это родительский проект а не самостоятельное приложение-->
+    <packaging>pom</packaging>
+
+    <properties>
+        <java.version>17</java.version>
+    </properties>
+
+<!--    Перечисление вложенных модулей: отредактировать-->
+    <modules>
+        <module>backend</module>
+        <module>backend-rest-client</module>
+        <module>client</module>
+    </modules>
+
+</project>

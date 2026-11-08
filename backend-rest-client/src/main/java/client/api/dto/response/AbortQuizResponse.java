@@ -1,6 +1,6 @@
-package presentation.dto.response;
+package client.api.dto.response;
 
-public record FinishQuizResponse(
+public record AbortQuizResponse(
         long sessionId,
         int quizScore,
         int userTotalScore

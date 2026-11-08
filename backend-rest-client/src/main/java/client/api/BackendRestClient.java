@@ -1,8 +1,9 @@
-package presentation;
+package client.api;
 
-import presentation.dto.request.AbortQuizRequest;
-import presentation.dto.response.AbortQuizResponse;
-import presentation.dto.response.GetLeaderboardResponse;
+/// Здесь отредачить
+import client.api.dto.request.AbortQuizRequest;
+import client.api.dto.response.AbortQuizResponse;
+import client.api.dto.response.GetLeaderboardResponse;
 import org.springframework.http.MediaType;
 import org.springframework.web.client.RestClient;
 

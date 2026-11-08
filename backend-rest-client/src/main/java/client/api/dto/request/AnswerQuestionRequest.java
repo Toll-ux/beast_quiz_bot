@@ -1,4 +1,4 @@
-package presentation.dto.request;
+package client.api.dto.request;
 
 import java.util.Set;
 
