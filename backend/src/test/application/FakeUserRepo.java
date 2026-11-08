@@ -1,4 +1,4 @@
-package test.application;
+package application;
 
 import application.*;
 import application.port.UserRepository;

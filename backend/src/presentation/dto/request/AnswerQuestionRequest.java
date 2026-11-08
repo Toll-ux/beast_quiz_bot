@@ -3,7 +3,7 @@ package presentation.dto.request;
 import java.util.Set;
 
 public record AnswerQuestionRequest(
-        long telegramId,
+        long userId,
         int questionId,
         Set<Integer> chosen
 ) {}

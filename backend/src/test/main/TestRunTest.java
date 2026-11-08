@@ -1,4 +1,4 @@
-package test.main;
+package main;
 
 import main.*;
 import application.*;
