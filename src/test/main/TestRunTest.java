@@ -1,10 +1,9 @@
-package main;
+package test.main;
 
-import application.QuizApplicationService;
-import infrastructure.HardcodedQuestionRepository;
-import infrastructure.HardcodedQuizRepository;
-import infrastructure.HardcodedUserRepository;
-import domain.User;
+import main.*;
+import application.*;
+import infrastructure.*;
+import domain.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.BeforeEach;

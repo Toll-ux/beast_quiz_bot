@@ -1,6 +1,7 @@
-package application;
+package test.application;
 
 import application.port.*;
+import application.*;
 import domain.*;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;

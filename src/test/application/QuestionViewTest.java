@@ -1,5 +1,6 @@
-package application;
+package test.application;
 
+import application.*;
 import domain.Question;
 import org.junit.jupiter.api.*;
 

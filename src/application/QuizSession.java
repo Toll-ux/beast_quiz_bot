@@ -10,4 +10,4 @@ import java.time.LocalDateTime;
  * @param quiz - квиз, содержит текущее состояние квиза, список вопросов, агрегатный счет за сессию и индекс текущего вопроса
  * @param startDateTime - время начала квиза для отправки в БД и отсчета времени текущей сессии
  */
-    public record QuizSession(int sessionId, long telegramId, Quiz quiz, LocalDateTime startDateTime) {}
+public record QuizSession(int sessionId, long telegramId, Quiz quiz, LocalDateTime startDateTime) {}

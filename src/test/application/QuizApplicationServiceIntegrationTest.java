@@ -1,13 +1,11 @@
-package application;
+package test.application;
 
+import application.*;
 import application.port.QuestionRepository;
 import application.port.QuizRepository;
 import application.port.UserRepository;
-import domain.Question;
-import domain.User;
-import infrastructure.HardcodedQuestionRepository;
-import infrastructure.HardcodedQuizRepository;
-import infrastructure.HardcodedUserRepository;
+import domain.*;
+import infrastructure.*;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

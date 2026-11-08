@@ -1,5 +1,6 @@
-package application;
+package test.application;
 
+import application.*;
 import application.port.*;
 import domain.*;
 import org.junit.jupiter.api.Assertions;

@@ -1,6 +1,7 @@
-package application;
+package test.application;
 
 import application.port.*;
+import application.*;
 import domain.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;

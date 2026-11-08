@@ -1,5 +1,6 @@
-package infrastructure;
+package test.infrastructure;
 
+import infrastructure.*;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
