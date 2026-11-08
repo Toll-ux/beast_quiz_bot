@@ -72,7 +72,7 @@
     <!-->характеристика проекта<-->
     <build>
         <!-->основная директория<-->
-        <sourceDirectory>src</sourceDirectory>
+        <sourceDirectory>backend/src</sourceDirectory>
         <!-->характеристики maven<-->
         <plugins>
             <plugin>
