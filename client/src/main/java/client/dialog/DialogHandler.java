@@ -7,9 +7,6 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-/**
- *
- */
 public class DialogHandler {
 
     private final BackendRestClient backendRestClient;
@@ -19,6 +16,7 @@ public class DialogHandler {
     private DialogState state = DialogState.MAIN_MENU;
 
     private long currentQuestionId;
+    private int currentQuestionAnswersCount;
 
     public DialogHandler(
             BackendRestClient backendRestClient,
@@ -145,6 +143,7 @@ public class DialogHandler {
                 backendRestClient.getCurrentQuestion(telegramId);
 
         currentQuestionId = question.questionId();
+        currentQuestionAnswersCount = question.answers().size();
 
         /// Класс, который позволяет эффективно работать с изменяемыми строками
         StringBuilder message = new StringBuilder();
@@ -152,7 +151,7 @@ public class DialogHandler {
         /// Формирование текста вопроса
         message.append(question.text()).append("\n\n");
 
-        for (int i = 0; i < question.answers().size(); i++) {
+        for (int i = 0; i < currentQuestionAnswersCount; i++) {
             message.append(i + 1)
                     .append(": ")
                     .append(question.answers().get(i))
@@ -250,21 +249,24 @@ public class DialogHandler {
     }
 
     /** В РЕДАКЦИИ
-     * Функция трансформирует введеный пользователем ответ на вопрос во множество цифр
+     * Функция формирует введеный пользователем ответ на вопрос во множество цифр
+     * @throws NumberFormatException, если какая-либо из цифр меньше 1 или
+     * больше максимального номера варианта ответа (currentQuestionAnswersCount)
+     * @return Множество цифр формата int до 0 до 8
      */
     private Set<Integer> parseAnswers(String input) {
         Set<Integer> result = new HashSet<>();
 
-        String[] parts = input.split("[,\\s]+");
+        String[] parts = input.trim().split("[\\s,]+");
 
         for (String part : parts) {
-            int number = Integer.parseInt(part);
-
-            if (number < 1 || number > 4) {
+            if (part.matches("[1-4]+")) {
+                for (char digit : part.toCharArray()) {
+                    result.add(Character.getNumericValue(digit) - 1);
+                }
+            } else {
                 throw new NumberFormatException();
             }
-
-            result.add(number - 1); // ?? Точно???
         }
 
         return result;
