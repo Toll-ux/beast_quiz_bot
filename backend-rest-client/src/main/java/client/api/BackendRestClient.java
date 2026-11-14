@@ -45,14 +45,20 @@ public class BackendRestClient
 
     public GetLeaderboardResponse getLeaderboard(long telegramId) {
         return restClient.get()
-                .uri("/api/leaderboard")
+                .uri(uriBuilder -> uriBuilder
+                        .path("/api/leaderboard")
+                        .queryParam("telegramId", telegramId)
+                        .build())
                 .retrieve()
                 .body(GetLeaderboardResponse.class);
     }
 
     public GetCurrentQuestionViewResponse getCurrentQuestion(long telegramId) {
         return restClient.get()
-                .uri("/api/current_question")
+                .uri(uriBuilder -> uriBuilder
+                        .path("/api/current_question")
+                        .queryParam("telegramId", telegramId)
+                        .build())
                 .retrieve()
                 .body(GetCurrentQuestionViewResponse.class);
     }
