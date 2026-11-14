@@ -5,21 +5,19 @@ import application.*;
 import application.port.QuestionRepository;
 import application.port.QuizRepository;
 import application.port.UserRepository;
+import org.springframework.web.bind.annotation.*;
 import presentation.dto.request.*;
 import presentation.dto.response.*;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
 
 import java.time.Clock;
 import java.util.List;
 
 @RestController
-//@PostMapping(value = "/api")
+@RequestMapping("/api")
 public class QuizRestController {
 
-    QuizApplicationService QAS;
+    private final QuizApplicationService QAS;
 
     QuizRestController(QuizApplicationService QAS){
         this.QAS = QAS;
@@ -37,17 +35,15 @@ public class QuizRestController {
     }
 
 
-    /** start
+    /** /start - POST запрос
      *
-     * @param {
-     * 	"userId": 12345
-     * 	"questionCount": 2
-     * }
-     * @return{
-     * 	"newQuizCreated": true
-     * }
+     * @param request - StartQuizRequest
+     *                {"userId": 12345, "questionCount": 2}
+     *
+     * @return response - ResponseEntity<StartQuizResponse>
+     *     {"newQuizCreated": true}
      */
-    @GetMapping("/start")
+    @PostMapping("/start")
     public ResponseEntity<StartQuizResponse> start(@RequestBody StartQuizRequest request){
         StartQuizResponse response = new StartQuizResponse(
                 QAS.start(
@@ -56,20 +52,15 @@ public class QuizRestController {
         return ResponseEntity.ok(response);
     }
 
-    /**
-     * abort
+    /** /abort - POST запрос
      *
-     * @param{
-     *    "userId": 12345
-     *     }
-     * @return
-     * {
-     * 	"sessionId": 2, Можно убрать?
-     * 	"quizScore": 40,
-     * 	"userTotalScore": 50
-     * }
+     * @param request - AbortQuizRequest
+     *               {"userId": 12345}
+     *
+     * @return response - ResponseEntity<AbortQuizResponse>
+     *     {"sessionId": 2, "quizScore": 40, "userTotalScore": 50}
      */
-    @GetMapping("/abort")
+    @PostMapping("/abort")
     public ResponseEntity<AbortQuizResponse> abort(@RequestBody AbortQuizRequest request){
         FinishQuizResult abortResult = QAS.abort(request.telegramId());
         AbortQuizResponse response = new AbortQuizResponse(
@@ -79,18 +70,15 @@ public class QuizRestController {
         return ResponseEntity.ok(response);
     }
 
-    /**finish
+    /** /finish - POST запрос
      *
-     * @param {
-     * 	"userId": 12345
-     * }
-     * @retrun {
-     * 	"sessionId": 3,
-     * 	"quizScore":  44,
-     * 	"userTotalScore": 34
-     * }
+     * @param request - FinishQuizRequest
+     *                {"userId": 12345}
+     *
+     * @return response - ResponseEntity<FinishQuizResponse>
+     *     {"sessionId": 3, "quizScore": 44, "userTotalScore": 34}
      */
-    @GetMapping("/finish")
+    @PostMapping("/finish")
     public ResponseEntity<FinishQuizResponse> finish(@RequestBody FinishQuizRequest request){
         FinishQuizResult finishResult = QAS.finish(request.telegramId());
         FinishQuizResponse response = new FinishQuizResponse(
@@ -100,21 +88,15 @@ public class QuizRestController {
         return ResponseEntity.ok(response);
     }
 
-    /**answer
+    /** \answer - POST запрос
      *
-     * @param {
-     * 	"userId": 12345,
-     * 	"questionId": 2,
-     * 	"chosen": [ 1, 2, 3]
-     * }
-     * @return {
-     * 	"correct": true,
-     * 	"correctAnswers": [1, 3, 4],
-     * 	"currentScore": 44,
-     * 	"finished": true
-     * }
+     * @param request - AnswerQuestionRequest
+     *                {	"userId": 12345, "questionId": 2, "chosen": [ 1, 2, 3] }
+     *
+     * @return response - ResponseEntity<AnswerQuestionResponse>
+     *     {"correct": true, "correctAnswers": [1, 3, 4], "currentScore": 44, "finished": true}
      */
-    @GetMapping("/answer")
+    @PostMapping("/answer")
     public ResponseEntity<AnswerQuestionResponse> answer(@RequestBody AnswerQuestionRequest request){
         AnswerQuestionResult ansResult = QAS.answer(
                 request.telegramId(),
@@ -129,20 +111,15 @@ public class QuizRestController {
         return ResponseEntity.ok(response);
     }
 
-    /**current_question
+    /** current_question - GET запрос
      *
-     * @param {
-     * 	"userId": 12345
-     * }
-     * @return  {  "questionId": 2,
-     * 	"text": "Какой бог был богом грома в скандинавской мифологии?",
-     * 	"answers": [
-     * 		"Один",
-     * 		"Тор",
-     * 		"Локи",
-     * 		"Фрейя"
-     * 	]
-     * }
+     * @param request - GetCurrentQuestionViewRequest
+     *                {  "userId": 12345}
+     *
+     * @return - ResponseEntity<GetCurrentQuestionViewResponse>
+     *     {  "questionId": 2, "text": "Какой бог был богом грома в скандинавской мифологии?",
+     * 	        "answers": ["Один", "Тор", "Локи", "Фрейя"]
+     * 	    }
      */
     @GetMapping("/current_question")
     public ResponseEntity<GetCurrentQuestionViewResponse> presentQuestion(@RequestBody GetCurrentQuestionViewRequest request){
@@ -154,19 +131,14 @@ public class QuizRestController {
         return ResponseEntity.ok(response);
     }
 
-    /** leaderboard
+    /** leaderboard - GET запрос
      *
-     * @param {
-     * 	"userId": 12345
-     * }
-     * @return{
-     * "leaderboard": [
-     * 	    {
-     * 		"place": 1,
-     * 		"score": 120,
-     * 		"nickname": "Alice"
-     *    }]
-     * }
+     * @param request - GetLeaderboardRequest
+     *                {  "userId": 12345}
+     *
+     * @return response - ResponseEntity<GetLeaderboardResponse>
+     *     { "leaderboard": [
+     * 	    { "place": 1, "score": 120,"nickname": "Alice" }, ... ]}
      */
     @GetMapping("/leaderboard")
     public ResponseEntity<GetLeaderboardResponse> leaderboard(@RequestBody GetLeaderboardRequest request){
