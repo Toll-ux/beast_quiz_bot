@@ -82,6 +82,7 @@ class QuizRestControllerTest {
         mockMvc.perform(post("/api/start")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
+                .andDo(print())
                 .andExpect(status().isBadRequest());
     }
 
@@ -93,6 +94,7 @@ class QuizRestControllerTest {
         mockMvc.perform(post("/api/start")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
+                .andDo(print())
                 .andExpect(status().isBadRequest());
     }
 
@@ -106,6 +108,7 @@ class QuizRestControllerTest {
         mockMvc.perform(post("/api/answer")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
+                .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.correct").value(true))
@@ -123,6 +126,7 @@ class QuizRestControllerTest {
         mockMvc.perform(post("/api/answer")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
+                .andDo(print())
                 .andExpect(status().isBadRequest());
     }
 
@@ -137,6 +141,7 @@ class QuizRestControllerTest {
         mockMvc.perform(post("/api/finish")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
+                .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.sessionId").isNumber())
@@ -165,6 +170,7 @@ class QuizRestControllerTest {
         mockMvc.perform(post("/api/abort")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
+                .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.sessionId").isNumber())
@@ -180,6 +186,7 @@ class QuizRestControllerTest {
         mockMvc.perform(post("/api/abort")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
+                .andDo(print())
                 .andExpect(status().isBadRequest());
     }
 
@@ -193,6 +200,7 @@ class QuizRestControllerTest {
         mockMvc.perform(get("/api/current_question")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
+                .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.questionId").value(1))
@@ -208,6 +216,7 @@ class QuizRestControllerTest {
         mockMvc.perform(get("/api/current_question")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
+                .andDo(print())
                 .andExpect(status().isBadRequest());
     }
 
@@ -219,6 +228,7 @@ class QuizRestControllerTest {
         mockMvc.perform(get("/api/leaderboard")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
+                .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.leaderboard").isArray());
