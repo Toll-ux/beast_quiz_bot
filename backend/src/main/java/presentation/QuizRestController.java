@@ -19,10 +19,12 @@ public class QuizRestController {
 
     private final QuizApplicationService QAS;
 
+    /// Инициализация перегрузка Quiz Application Service
     QuizRestController(QuizApplicationService QAS){
         this.QAS = QAS;
     }
 
+    /// Инициализация перегрузка Quiz Application Service
     QuizRestController(QuestionRepository questionRepository,
                        QuizRepository quizRepository,
                        UserRepository userRepository,
@@ -45,11 +47,20 @@ public class QuizRestController {
      */
     @PostMapping("/start")
     public ResponseEntity<StartQuizResponse> start(@RequestBody StartQuizRequest request){
-        StartQuizResponse response = new StartQuizResponse(
-                QAS.start(
-                        request.telegramId(),
-                        request.questionCount()));
-        return ResponseEntity.ok(response);
+        boolean success;
+
+        /// try catch для возможных ошибок, важно, что кроме IllegalArgumentException и IllegalStateException он не должен обрабатывать
+        try {
+            /// обработка QAS.start
+            success = QAS.start(
+                    request.telegramId(),
+                    request.questionCount());
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            /// исключение - всегда 400 (badRequest)
+            return ResponseEntity.badRequest().build();
+        }
+        /// если catch не сработал, то 200 (ok) + json
+        return ResponseEntity.ok(new StartQuizResponse(success));
     }
 
     /** /abort - POST запрос
@@ -62,11 +73,22 @@ public class QuizRestController {
      */
     @PostMapping("/abort")
     public ResponseEntity<AbortQuizResponse> abort(@RequestBody AbortQuizRequest request){
-        FinishQuizResult abortResult = QAS.abort(request.telegramId());
+        FinishQuizResult abortResult;
+
+        /// try catch для возможных ошибок, важно, что кроме IllegalArgumentException и IllegalStateException он не должен обрабатывать
+        try {
+            /// обработка QAS.abort
+            abortResult = QAS.abort(request.telegramId());
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            /// исключение - всегда 400 (badRequest)
+            return ResponseEntity.badRequest().build();
+        }
+        /// переупаковываем данные
         AbortQuizResponse response = new AbortQuizResponse(
                 abortResult.sessionId(),
                 abortResult.quizScore(),
                 abortResult.userTotalScore());
+        /// если catch не сработал, то 200 (ok) + json
         return ResponseEntity.ok(response);
     }
 
@@ -80,11 +102,20 @@ public class QuizRestController {
      */
     @PostMapping("/finish")
     public ResponseEntity<FinishQuizResponse> finish(@RequestBody FinishQuizRequest request){
-        FinishQuizResult finishResult = QAS.finish(request.telegramId());
+        FinishQuizResult finishResult;
+        /// try catch для возможных ошибок, важно, что кроме IllegalArgumentException и IllegalStateException он не должен обрабатывать
+        try {
+            finishResult = QAS.finish(request.telegramId());
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            /// исключение - всегда 400 (badRequest)
+            return ResponseEntity.badRequest().build();
+        }
+        /// переупаковываем данные
         FinishQuizResponse response = new FinishQuizResponse(
                 finishResult.sessionId(),
                 finishResult.quizScore(),
                 finishResult.userTotalScore());
+        /// если catch не сработал, то 200 (ok) + json
         return ResponseEntity.ok(response);
     }
 
@@ -98,16 +129,24 @@ public class QuizRestController {
      */
     @PostMapping("/answer")
     public ResponseEntity<AnswerQuestionResponse> answer(@RequestBody AnswerQuestionRequest request){
-        AnswerQuestionResult ansResult = QAS.answer(
-                request.telegramId(),
-                request.questionId(),
-                request.chosen());
-
+        AnswerQuestionResult ansResult;
+        /// try catch для возможных ошибок, важно, что кроме IllegalArgumentException и IllegalStateException он не должен обрабатывать
+        try {
+            ansResult = QAS.answer(
+                    request.telegramId(),
+                    request.questionId(),
+                    request.chosen());
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            /// исключение - всегда 400 (badRequest)
+            return ResponseEntity.badRequest().build();
+        }
+        /// переупаковываем данные
         AnswerQuestionResponse response = new AnswerQuestionResponse(
                 ansResult.correct(),
                 ansResult.correctAnswers(),
                 ansResult.currentScore(),
                 ansResult.finished());
+        /// если catch не сработал, то 200 (ok) + json
         return ResponseEntity.ok(response);
     }
 
@@ -123,11 +162,20 @@ public class QuizRestController {
      */
     @GetMapping("/current_question")
     public ResponseEntity<GetCurrentQuestionViewResponse> presentQuestion(@RequestBody GetCurrentQuestionViewRequest request){
-        QuestionView currentQuestion = QAS.presentQuestion(request.telegramId());
+        QuestionView currentQuestion;
+        /// try catch для возможных ошибок, важно, что кроме IllegalArgumentException и IllegalStateException он не должен обрабатывать
+        try {
+            currentQuestion = QAS.presentQuestion(request.telegramId());
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            /// исключение - всегда 400 (badRequest)
+            return ResponseEntity.badRequest().build();
+        }
+        /// переупаковываем данные
         GetCurrentQuestionViewResponse response = new GetCurrentQuestionViewResponse(
                 currentQuestion.questionId(),
                 currentQuestion.text(),
                 currentQuestion.answers());
+        /// если catch не сработал, то 200 (ok) + json
         return ResponseEntity.ok(response);
     }
 
@@ -142,7 +190,15 @@ public class QuizRestController {
      */
     @GetMapping("/leaderboard")
     public ResponseEntity<GetLeaderboardResponse> leaderboard(@RequestBody GetLeaderboardRequest request){
-        List<LeaderboardEntry> leaderboard = QAS.getLeaderBoard(request.telegramId());
+        List<LeaderboardEntry> leaderboard;
+        /// try catch для возможных ошибок, важно, что кроме IllegalArgumentException и IllegalStateException он не должен обрабатывать
+        try {
+            leaderboard = QAS.getLeaderBoard(request.telegramId());
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            /// исключение - всегда 400 (badRequest)
+            return ResponseEntity.badRequest().build();
+        }
+        /// переупаковываем данные
         GetLeaderboardResponse response = new GetLeaderboardResponse(leaderboard.stream()
                 .map(player -> new LeaderboardResponseEntry(
                         player.place(),
@@ -150,6 +206,7 @@ public class QuizRestController {
                         player.nickname()))
                 .toList()
         );
+        /// если catch не сработал, то 200 (ok) + json
         return ResponseEntity.ok(response);
     }
 
