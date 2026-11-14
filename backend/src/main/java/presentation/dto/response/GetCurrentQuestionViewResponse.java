@@ -1,4 +1,4 @@
-package main.java.presentation.dto.response;
+package presentation.dto.response;
 
 import java.util.List;
 

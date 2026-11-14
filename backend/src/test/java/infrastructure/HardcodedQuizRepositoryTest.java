@@ -1,9 +1,8 @@
-package java.infrastructure;
+package infrastructure;
 
 import application.QuizSession;
 import domain.Question;
 import domain.Quiz;
-import infrastructure.HardcodedQuizRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

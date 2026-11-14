@@ -1,9 +1,9 @@
-package main.java.application;
+package application;
 
-import main.java.application.port.QuizRepository;
-import main.java.application.port.UserRepository;
-import main.java.domain.Quiz;
-import main.java.domain.User;
+import application.port.QuizRepository;
+import application.port.UserRepository;
+import domain.Quiz;
+import domain.User;
 
 public class FinishQuiz
 {

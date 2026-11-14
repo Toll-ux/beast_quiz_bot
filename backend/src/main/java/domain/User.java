@@ -1,4 +1,4 @@
-package main.java.domain;
+package domain;
 
 /**Статус пользователя - задел на будущее*/
 enum UserPermissions{

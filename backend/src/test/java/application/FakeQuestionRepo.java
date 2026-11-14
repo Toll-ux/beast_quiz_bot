@@ -1,6 +1,5 @@
-package java.application;
+package application;
 
-import application.QuestionView;
 import application.port.QuestionRepository;
 import domain.Question;
 

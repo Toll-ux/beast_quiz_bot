@@ -1,9 +1,9 @@
-package main.java.application;
+package application;
 
 import application.port.*;
-import main.java.application.port.QuestionRepository;
-import main.java.application.port.QuizRepository;
-import main.java.application.port.UserRepository;
+import application.port.QuestionRepository;
+import application.port.QuizRepository;
+import application.port.UserRepository;
 
 import java.util.List;
 import java.util.Set;

@@ -1,7 +1,7 @@
-package main.java.infrastructure;
+package infrastructure;
 
-import main.java.application.port.QuestionRepository;
-import main.java.domain.Question;
+import application.port.QuestionRepository;
+import domain.Question;
 
 import java.util.List;
 import java.util.ArrayList;

@@ -1,8 +1,8 @@
-package main.java.infrastructure;
+package infrastructure;
 
-import main.java.application.LeaderboardEntry;
-import main.java.application.port.UserRepository;
-import main.java.domain.User;
+import application.LeaderboardEntry;
+import application.port.UserRepository;
+import domain.User;
 
 import java.util.*;
 

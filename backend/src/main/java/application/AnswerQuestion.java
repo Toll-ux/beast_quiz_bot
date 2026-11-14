@@ -1,9 +1,9 @@
-package main.java.application;
+package application;
 
-import main.java.application.port.QuizRepository;
-import main.java.domain.AnswerResult;
-import main.java.domain.Question;
-import main.java.domain.Quiz;
+import application.port.QuizRepository;
+import domain.AnswerResult;
+import domain.Question;
+import domain.Quiz;
 
 import java.util.Set;
 

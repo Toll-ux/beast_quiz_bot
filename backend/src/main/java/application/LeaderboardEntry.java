@@ -1,4 +1,4 @@
-package main.java.application;
+package application;
 
 /** LeaderboardEntry - Контейнер для передачи данных из port 2 app 2 pres
  *

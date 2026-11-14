@@ -1,6 +1,6 @@
-package main.java.application;
+package application;
 
-import main.java.domain.Quiz;
+import domain.Quiz;
 import java.time.LocalDateTime;
 
 /**

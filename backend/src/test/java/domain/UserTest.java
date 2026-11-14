@@ -1,6 +1,4 @@
-package java.domain;
-
-import domain.User;
+package domain;
 
 
 import org.junit.jupiter.api.*;

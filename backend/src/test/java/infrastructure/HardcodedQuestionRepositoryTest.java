@@ -1,6 +1,5 @@
-package java.infrastructure;
+package infrastructure;
 
-import infrastructure.HardcodedQuestionRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

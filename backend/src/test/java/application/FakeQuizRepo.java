@@ -1,7 +1,6 @@
-package java.application;
+package application;
 
 import application.port.QuizRepository;
-import application.QuizSession;
 
 import java.util.HashMap;
 import java.util.Map;

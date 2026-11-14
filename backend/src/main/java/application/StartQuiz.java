@@ -1,11 +1,11 @@
-package main.java.application;
+package application;
 
-import main.java.application.port.QuestionRepository;
-import main.java.application.port.QuizRepository;
-import main.java.application.port.UserRepository;
-import main.java.domain.User;
-import main.java.domain.Question;
-import main.java.domain.Quiz;
+import application.port.QuestionRepository;
+import application.port.QuizRepository;
+import application.port.UserRepository;
+import domain.User;
+import domain.Question;
+import domain.Quiz;
 
 import java.util.List;
 import java.time.Clock;

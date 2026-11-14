@@ -1,7 +1,5 @@
-package java.domain;
+package domain;
 
-import domain.Question;
-import domain.Quiz;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;

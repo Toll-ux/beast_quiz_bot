@@ -1,12 +1,12 @@
-package main.java.presentation;
+package presentation;
 
 
-import main.java.application.*;
-import main.java.application.port.QuestionRepository;
-import main.java.application.port.QuizRepository;
-import main.java.application.port.UserRepository;
-import main.java.presentation.dto.request.*;
-import main.java.presentation.dto.response.*;
+import application.*;
+import application.port.QuestionRepository;
+import application.port.QuizRepository;
+import application.port.UserRepository;
+import presentation.dto.request.*;
+import presentation.dto.response.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;

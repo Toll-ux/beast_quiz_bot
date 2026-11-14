@@ -1,6 +1,6 @@
-package main.java.application.port;
+package application.port;
 
-import main.java.application.QuizSession;
+import application.QuizSession;
 
 import java.util.Optional;
 /*

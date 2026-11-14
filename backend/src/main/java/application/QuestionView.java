@@ -1,6 +1,6 @@
-package main.java.application;
+package application;
 
-import main.java.domain.Question;
+import domain.Question;
 import java.util.List;
 
 

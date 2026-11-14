@@ -1,10 +1,10 @@
-package main.java.main;
+package main;
 
-import main.java.application.*;
-import main.java.infrastructure.HardcodedQuestionRepository;
-import main.java.infrastructure.HardcodedQuizRepository;
-import main.java.infrastructure.HardcodedUserRepository;
-import main.java.domain.User;
+import application.*;
+import infrastructure.HardcodedQuestionRepository;
+import infrastructure.HardcodedQuizRepository;
+import infrastructure.HardcodedUserRepository;
+import domain.User;
 
 import java.io.PrintStream;
 import java.time.Clock;

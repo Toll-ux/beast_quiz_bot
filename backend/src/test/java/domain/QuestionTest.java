@@ -1,6 +1,5 @@
-package java.domain;
+package domain;
 
-import domain.Question;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

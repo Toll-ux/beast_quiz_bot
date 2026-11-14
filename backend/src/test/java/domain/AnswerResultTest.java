@@ -1,6 +1,5 @@
-package java.domain;
+package domain;
 
-import domain.AnswerResult;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

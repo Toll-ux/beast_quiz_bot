@@ -1,8 +1,14 @@
-package java.application;
+package application;
 
+import application.port.QuestionRepository;
+import application.port.QuizRepository;
+import application.port.UserRepository;
 import domain.Question;
 import domain.User;
 
+import infrastructure.HardcodedQuestionRepository;
+import infrastructure.HardcodedQuizRepository;
+import infrastructure.HardcodedUserRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

@@ -1,7 +1,7 @@
-package main.java.application.port;
+package application.port;
 
-import main.java.application.LeaderboardEntry;
-import main.java.domain.User;
+import application.LeaderboardEntry;
+import domain.User;
 
 import java.util.List;
 import java.util.Optional;

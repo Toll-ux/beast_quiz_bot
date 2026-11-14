@@ -1,8 +1,7 @@
-package java.application;
+package application;
 
 import application.port.UserRepository;
 import domain.User;
-import application.LeaderboardEntry;
 
 import java.util.*;
 

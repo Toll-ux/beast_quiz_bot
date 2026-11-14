@@ -1,8 +1,12 @@
-package java.main;
+package main;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import main.TestRun;
+import application.QuizApplicationService;
+import domain.User;
+import infrastructure.HardcodedQuestionRepository;
+import infrastructure.HardcodedQuizRepository;
+import infrastructure.HardcodedUserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

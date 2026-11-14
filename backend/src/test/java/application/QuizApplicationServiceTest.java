@@ -1,6 +1,10 @@
-package java.application;
+package application;
 
 import static org.junit.jupiter.api.Assertions.*;
+
+import domain.Question;
+import domain.Quiz;
+import domain.User;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import java.time.Clock;

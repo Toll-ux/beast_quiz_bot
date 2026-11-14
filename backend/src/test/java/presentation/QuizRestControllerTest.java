@@ -1,8 +1,8 @@
-package java.presentation;
+package presentation;
 
-import java.application.FakeQuestionRepo;
-import java.application.FakeQuizRepo;
-import java.application.FakeUserRepo;
+import application.FakeQuestionRepo;
+import application.FakeQuizRepo;
+import application.FakeUserRepo;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import domain.User;
@@ -16,6 +16,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import presentation.dto.request.*;
+import presentation.dto.response.*;
 
 import java.time.Clock;
 import java.time.Instant;

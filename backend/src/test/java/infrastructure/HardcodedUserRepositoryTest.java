@@ -1,8 +1,7 @@
-package java.infrastructure;
+package infrastructure;
 
 import application.LeaderboardEntry;
 import domain.User;
-import infrastructure.HardcodedUserRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

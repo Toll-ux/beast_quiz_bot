@@ -1,4 +1,4 @@
-package java.application;
+package application;
 
 import domain.User;
 

@@ -1,7 +1,7 @@
-package main.java.infrastructure;
+package infrastructure;
 
-import main.java.application.port.QuizRepository;
-import main.java.application.QuizSession;
+import application.port.QuizRepository;
+import application.QuizSession;
 
 import java.util.HashMap;
 import java.util.Map;
