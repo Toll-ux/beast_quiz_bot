@@ -53,7 +53,7 @@ public class QuizRestController {
         try {
             /// обработка QAS.start
             success = QAS.start(
-                    request.telegramId(),
+                    request.userId(),
                     request.questionCount());
         } catch (IllegalArgumentException | IllegalStateException e) {
             /// исключение - всегда 400 (badRequest)
@@ -78,7 +78,7 @@ public class QuizRestController {
         /// try catch для возможных ошибок, важно, что кроме IllegalArgumentException и IllegalStateException он не должен обрабатывать
         try {
             /// обработка QAS.abort
-            abortResult = QAS.abort(request.telegramId());
+            abortResult = QAS.abort(request.userId());
         } catch (IllegalArgumentException | IllegalStateException e) {
             /// исключение - всегда 400 (badRequest)
             return ResponseEntity.badRequest().build();
@@ -105,7 +105,7 @@ public class QuizRestController {
         FinishQuizResult finishResult;
         /// try catch для возможных ошибок, важно, что кроме IllegalArgumentException и IllegalStateException он не должен обрабатывать
         try {
-            finishResult = QAS.finish(request.telegramId());
+            finishResult = QAS.finish(request.userId());
         } catch (IllegalArgumentException | IllegalStateException e) {
             /// исключение - всегда 400 (badRequest)
             return ResponseEntity.badRequest().build();
@@ -133,7 +133,7 @@ public class QuizRestController {
         /// try catch для возможных ошибок, важно, что кроме IllegalArgumentException и IllegalStateException он не должен обрабатывать
         try {
             ansResult = QAS.answer(
-                    request.telegramId(),
+                    request.userId(),
                     request.questionId(),
                     request.chosen());
         } catch (IllegalArgumentException | IllegalStateException e) {
@@ -165,7 +165,7 @@ public class QuizRestController {
         QuestionView currentQuestion;
         /// try catch для возможных ошибок, важно, что кроме IllegalArgumentException и IllegalStateException он не должен обрабатывать
         try {
-            currentQuestion = QAS.presentQuestion(request.telegramId());
+            currentQuestion = QAS.presentQuestion(request.userId());
         } catch (IllegalArgumentException | IllegalStateException e) {
             /// исключение - всегда 400 (badRequest)
             return ResponseEntity.badRequest().build();
@@ -193,7 +193,7 @@ public class QuizRestController {
         List<LeaderboardEntry> leaderboard;
         /// try catch для возможных ошибок, важно, что кроме IllegalArgumentException и IllegalStateException он не должен обрабатывать
         try {
-            leaderboard = QAS.getLeaderBoard(request.telegramId());
+            leaderboard = QAS.getLeaderBoard(request.userId());
         } catch (IllegalArgumentException | IllegalStateException e) {
             /// исключение - всегда 400 (badRequest)
             return ResponseEntity.badRequest().build();
