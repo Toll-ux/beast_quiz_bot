@@ -24,4 +24,7 @@ hs_err_pid*
 replay_pid*
 
 .DS_Store
-.idea/
+/.idea
+/backend/out
+/backend/target
+Распределение работы.md

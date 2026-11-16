@@ -1,0 +1,211 @@
+package domain;
+
+import domain.Question;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
+
+class QuestionTest {
+    /**Референсные переменные*/
+    public final int id = 1;
+    public final String text = "2+2 = ?";
+    public final List<String> answers = List.of("1", "No", "14", "4");
+    public final Set<Integer> correctAnswerIndexes = Set.of(3);
+    public final Question qReference = new Question(id, text, answers, correctAnswerIndexes);
+
+    /**Переменные для проверки вопроса с одним ответом*/
+    public int idOne = 2;
+    public String textOne = "3+3 = ?";
+    public List<String> answersOne = List.of("6", "9", "4", "4");
+    public Set<Integer> correctAnswerIndexesOne = Set.of(0);
+    public Question questionWithOneAnswer = new Question(idOne, textOne, answersOne, correctAnswerIndexesOne);
+
+    /**Переменные для проверки вопроса с двумя ответами. Остальные случаи по индукции*/
+    public int idTwo = 3;
+    public String textTwo = "3*3 = ?";
+    public List<String> answersTwo = List.of("9", "No", "18/2", "4");
+    public Set<Integer> correctAnswerIndexesTwo = Set.of(0, 2);
+    public Question questionWithTwoAnswers = new Question(idTwo, textTwo, answersTwo, correctAnswerIndexesTwo);
+    public Set<Integer> correctAnswerIndexesTwoShuffled = Set.of(2, 0);
+
+    @DisplayName("Работа конструктора")
+    @Test
+    void generalAccessPermission(){
+        Question qt = new Question(id, text, answers, correctAnswerIndexes);
+
+        assertEquals(id, qt.id());
+        assertEquals(text, qt.text());
+        assertEquals(answers, qt.answers());
+        assertEquals(correctAnswerIndexes, qt.correctAnswerIndexes());
+    }
+
+    @DisplayName("Конструктор получил id = 0")
+    @Test
+    void constructorZeroId(){
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> new Question(0, text, answers, correctAnswerIndexes));
+
+        assertEquals("Question id is must be positive", thrown.getMessage());
+    }
+
+    @DisplayName("Конструктор получил отрицательный id")
+    @Test
+    void constructorNegativeId(){
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> new Question(-1000, text, answers, correctAnswerIndexes));
+
+        assertEquals("Question id is must be positive", thrown.getMessage());
+    }
+
+    @DisplayName("Конструктор получил пустую строку вопроса")
+    @Test
+    void constructorNoQuestion(){
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> new Question(id, "", answers, correctAnswerIndexes));
+
+        assertEquals("Question text must not be blank", thrown.getMessage());
+    }
+
+    @DisplayName("Конструктор получил null строку вопроса")
+    @Test
+    void constructorNullQuestion(){
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> new Question(id, null, answers, correctAnswerIndexes));
+
+        assertEquals("Question text must not be blank", thrown.getMessage());
+    }
+
+    @DisplayName("Конструктор получил пустой список ответов")
+    @Test
+    void constructorNoAnswers(){
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> new Question(id, text, List.of(), correctAnswerIndexes));
+
+        assertEquals("List of answers must not be empty", thrown.getMessage());
+    }
+
+    @DisplayName("Конструктор получил null вместо списка ответов")
+    @Test
+    void constructorNullAnswers(){
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> new Question(id, text, null, correctAnswerIndexes));
+
+        assertEquals("List of answers must not be empty", thrown.getMessage());
+    }
+
+    @DisplayName("Конструктор получил пустое множество правильных ответов")
+    @Test
+    void constructorNoCorrectAnswerIndexes(){
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> new Question(id, text, answers, Set.of()));
+
+        assertEquals("Set of correctAnswerIndexes must not be empty", thrown.getMessage());
+    }
+
+    @DisplayName("Конструктор получил пустое null вместо множества правильных ответов")
+    @Test
+    void constructorNullCorrectAnswerIndexes(){
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> new Question(id, text, answers, null));
+
+        assertEquals("Set of correctAnswerIndexes must not be empty", thrown.getMessage());
+    }
+
+    @DisplayName("Конструктор получил множество ответов, но есть индекс за пределами списка")
+    @Test
+    void constructorCorrectAnswerIndexesBiggerThanList(){
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> new Question(id, text, answers, Set.of(1, 2, 4)));
+
+        assertEquals("Correct answer indexes are out of range", thrown.getMessage());
+    }
+
+    @DisplayName("Конструктор получил множество ответов, но есть отрицательный индекс")
+    @Test
+    void constructorCorrectAnswerIndexesNegative(){
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> new Question(id, text, answers, Set.of(1, 2, -3)));
+
+        assertEquals("Correct answer indexes are out of range", thrown.getMessage());
+    }
+
+    @DisplayName("Множество индексов в классе постоянное, проверка изменением множества, которым инициализировался класс")
+    @Test
+    void initialisedCorrectAnswerIndexesChange() {
+        Set<Integer> changeableCorAnsIdx  = new CopyOnWriteArraySet<>(correctAnswerIndexes);
+        Question qt = new Question(id, text, answers, changeableCorAnsIdx);
+
+        changeableCorAnsIdx.clear();
+        assertEquals(correctAnswerIndexes, qt.correctAnswerIndexes());
+    }
+
+    @DisplayName("Множество индексов в классе постоянное, проверка изменением множества, которое получили по get запросу")
+    @Test
+    void getCorrectAnswerIndexesChange(){
+        Set<Integer> newCorrectAnswerIndexes = qReference.correctAnswerIndexes();
+        assertThrows(UnsupportedOperationException.class, newCorrectAnswerIndexes::clear);
+    }
+
+    @DisplayName("Список ответов в классе постоянный, проверка изменением списка, которым инициализировался класс")
+    @Test
+    void initialisedAnswersChange(){
+        List<String> newAnswers = new ArrayList<>(answers);
+        Question qt = new Question(id, text, newAnswers, correctAnswerIndexes);
+        newAnswers.clear();
+        assertEquals(answers, qt.answers());
+    }
+
+    @DisplayName("Список индексов в классе постоянный, проверка изменением списка, который получили по get запросу")
+    @Test
+    void getAnswersChange(){
+        List<String> newAnswers = qReference.answers();
+        assertThrows(UnsupportedOperationException.class, newAnswers::clear);
+    }
+
+    @DisplayName("Проверка на правильность ответа на вход пустое множество")
+    @Test
+    void isCorrectAnswerEmptyInput(){
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> qReference.isCorrectAnswer(Set.of()));
+
+        assertEquals("Set of ansIndexes must not be empty", thrown.getMessage());
+    }
+
+    @DisplayName("Проверка на правильность ответа  на вход null")
+    @Test
+    void isCorrectAnswerNull(){
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> qReference.isCorrectAnswer(null));
+
+        assertEquals("Set of ansIndexes must not be empty", thrown.getMessage());
+    }
+
+    @DisplayName("Проверка на правильность ответа на вход множество с индексом > длины списка")
+    @Test
+    void isCorrectAnswerIndexBiggerThanListOfAnswers(){
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> qReference.isCorrectAnswer(Set.of(answers.size() + 2)));
+
+        assertEquals("Correct answer index is out of range", thrown.getMessage());
+    }
+
+    @DisplayName("Проверка на правильность ответа на вход множество с индексом < 0")
+    @Test
+    void isCorrectAnswerIndexNegative(){
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> qReference.isCorrectAnswer(Set.of(-12)));
+
+        assertEquals("Correct answer index is out of range", thrown.getMessage());
+    }
+
+
+    @DisplayName("Проверка на правильность ответа для set 1 элемент, неправильный ответ, частично правильный ответ")
+    @Test
+    void isCorrectAnswerOneRightAnswers(){
+        assertTrue(questionWithOneAnswer.isCorrectAnswer(correctAnswerIndexesOne));
+        assertFalse(questionWithOneAnswer.isCorrectAnswer(correctAnswerIndexesTwo));
+        assertFalse(questionWithOneAnswer.isCorrectAnswer(correctAnswerIndexesTwoShuffled));
+        assertFalse(questionWithOneAnswer.isCorrectAnswer(correctAnswerIndexes));
+    }
+
+    @DisplayName("Проверка на правильность ответа для set 2 элемента, неправильный ответ, частично правильный ответ")
+    @Test
+    void isCorrectAnswerTwoRightAnswers(){
+        assertTrue(questionWithTwoAnswers.isCorrectAnswer(correctAnswerIndexesTwo));
+        assertTrue(questionWithTwoAnswers.isCorrectAnswer(correctAnswerIndexesTwoShuffled));
+        assertFalse(questionWithTwoAnswers.isCorrectAnswer(correctAnswerIndexesOne));
+        assertFalse(questionWithTwoAnswers.isCorrectAnswer(correctAnswerIndexes));
+    }
+
+}
