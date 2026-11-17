@@ -1,5 +1,5 @@
 package client.api.dto.request;
 
 public record FinishQuizRequest(
-        long userId
+        long telegramId
 ) {}
