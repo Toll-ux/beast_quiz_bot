@@ -183,7 +183,7 @@ public class DialogHandler {
         Set<Integer> chosenAnswers;
 
         try {
-            chosenAnswers = parseAnswers(input);
+            chosenAnswers = parseAnswers(input, currentQuestionAnswersCount);
 
             if (chosenAnswers.isEmpty()) {
                 throw new NumberFormatException();
@@ -199,7 +199,7 @@ public class DialogHandler {
         AnswerQuestionResponse result =
                 backendRestClient.answerQuestion(
                         telegramId,
-                        currentQuestionId,
+                        (int) currentQuestionId,
                         chosenAnswers
                 );
 
@@ -248,21 +248,27 @@ public class DialogHandler {
         return new DialogResponse(message.toString(), false);
     }
 
-    /** В РЕДАКЦИИ
+    /**
      * Функция формирует введеный пользователем ответ на вопрос во множество цифр
      * @throws NumberFormatException, если какая-либо из цифр меньше 1 или
      * больше максимального номера варианта ответа (currentQuestionAnswersCount)
      * @return Множество цифр формата int до 0 до 8
      */
-    private Set<Integer> parseAnswers(String input) {
+    private Set<Integer> parseAnswers(String input, int currentQuestionAnswersCount) {
         Set<Integer> result = new HashSet<>();
 
         String[] parts = input.trim().split("[\\s,]+");
 
         for (String part : parts) {
-            if (part.matches("[1-4]+")) {
+            if (part.matches("\\d+")) {
                 for (char digit : part.toCharArray()) {
-                    result.add(Character.getNumericValue(digit) - 1);
+                    int answerNumber = Character.getNumericValue(digit);
+
+                    if (answerNumber < 1 || answerNumber > currentQuestionAnswersCount) {
+                        throw new NumberFormatException();
+                    }
+
+                    result.add(answerNumber - 1);
                 }
             } else {
                 throw new NumberFormatException();
