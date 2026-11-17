@@ -14,12 +14,21 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
+    <properties>
+        <maven.compiler.release>25</maven.compiler.release>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <spring-framework.version>6.2.14</spring-framework.version>
+        <jackson.version>2.18.3</jackson.version>
+        <junit.version>5.11.3</junit.version>
+    </properties>
+
     <artifactId>backend-rest-client</artifactId>
 
     <dependencies>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
+            <version>${jackson.version}</version>
         </dependency>
 
         <dependency>
