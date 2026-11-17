@@ -4,7 +4,10 @@ import client.api.BackendRestClient;
 import client.dialog.DialogHandler;
 import client.dialog.DialogResponse;
 
+import java.io.InputStream;
+import java.io.PrintStream;
 import java.util.Scanner;
+import java.util.function.Function;
 
 /**
  * Создает хэндлер диалога для пользователя с его telegramId;
@@ -15,41 +18,48 @@ import java.util.Scanner;
 public class ClientApplication {
 
     public static void main(String[] args) {
+        run(System.in, System.out, telegramId ->
+                new DialogHandler(
+                        new BackendRestClient("http://localhost:8080"),
+                        telegramId
+                )
+        );
+    }
 
-        Scanner scanner = new Scanner(System.in);
+    static void run(
+            InputStream inputStream,
+            PrintStream outputStream,
+            Function<Long, DialogHandler> handlerFactory
+    ) {
+        try (Scanner scanner = new Scanner(inputStream)) {
 
-        System.out.println("Welcome to our Quiz-bot!");
-        System.out.print("Enter your Telegram ID: ");
+            outputStream.println("Welcome to our Quiz-bot!");
+            outputStream.print("Enter your Telegram ID: ");
 
-        long telegramId = Long.parseLong(scanner.nextLine().trim());
+            long telegramId = Long.parseLong(scanner.nextLine().trim());
 
-        BackendRestClient backendRestClient =
-                new BackendRestClient("http://localhost:8080");
+            DialogHandler dialogHandler = handlerFactory.apply(telegramId);
 
-        DialogHandler dialogHandler =
-                new DialogHandler(backendRestClient, telegramId);
+            outputStream.println("""
+                    Choose an action:
+                    p — play quiz
+                    l — show leaderboard
+                    h — help
+                    q — quit
+                    """);
 
-        System.out.println("""
-                Choose an action:
-                p — play quiz
-                l — show leaderboard
-                h — help
-                q — quit
-                """);
+            while (true) {
+                String input = scanner.nextLine();
 
-        while (true) {
-            String input = scanner.nextLine();
+                DialogResponse response =
+                        dialogHandler.handleMessage(input);
 
-            DialogResponse response =
-                    dialogHandler.handleMessage(input);
+                outputStream.println(response.message());
 
-            System.out.println(response.message());
-
-            if (response.exitRequested()) {
-                break;
+                if (response.exitRequested()) {
+                    break;
+                }
             }
         }
-
-        scanner.close();
     }
 }
