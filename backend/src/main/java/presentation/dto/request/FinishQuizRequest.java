@@ -1,4 +1,4 @@
-package client.api.dto.request;
+package presentation.dto.request;
 
 public record FinishQuizRequest(
         long userId

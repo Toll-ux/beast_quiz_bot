@@ -1,4 +1,4 @@
-package client.api.dto.response;
+package presentation.dto.response;
 
 import java.util.Set;
 
