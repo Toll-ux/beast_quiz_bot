@@ -1,10 +1,10 @@
 package client.api.dto.response;
 
-import java.util.List;
+import java.util.Set;
 
 public record AnswerQuestionResponse(
         boolean correct,
-        List<Integer> correctAnswers,
+        Set<Integer> correctAnswers,
         int currentScore,
         boolean finished
 ) {}

@@ -1,0 +1,15 @@
+client\api\dto\response\StartQuizResponse.class
+client\api\QuizBackendClient.class
+client\api\dto\request\AnswerQuestionRequest.class
+client\api\dto\request\AbortQuizRequest.class
+client\api\dto\response\AbortQuizResponse.class
+client\api\dto\response\AnswerQuestionResponse.class
+client\api\dto\response\GetCurrentQuestionViewResponse.class
+client\api\dto\request\GetLeaderboardRequest.class
+client\api\BackendRestClient.class
+client\api\dto\response\GetLeaderboardResponse.class
+client\api\dto\response\FinishQuizResponse.class
+client\api\dto\request\StartQuizRequest.class
+client\api\dto\response\LeaderboardResponseEntry.class
+client\api\dto\request\FinishQuizRequest.class
+client\api\dto\request\GetCurrentQuestionViewRequest.class

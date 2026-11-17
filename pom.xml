@@ -7,31 +7,48 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-<!--    Версия SpringBoot возможно потребует редактирования-->
+    <!--    Версия SpringBoot возможно потребует редактирования-->
+    <!-->
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>3.5.7</version>
         <relativePath/>
     </parent>
-
-<!--    groupId можно поменять на com.quizbot, пока оставлено так-->
+    <-->
+    <!--    groupId можно поменять на com.quizbot, пока оставлено так-->
     <groupId>com.quizbot</groupId>
     <artifactId>beast-quiz-bot</artifactId>
     <version>1.0-SNAPSHOT</version>
 
-<!--    Тип Maven-проекта. Значение pom означает, что это родительский проект а не самостоятельное приложение-->
+    <!--    Тип Maven-проекта. Значение pom означает, что это родительский проект а не самостоятельное приложение-->
     <packaging>pom</packaging>
 
     <properties>
         <java.version>17</java.version>
+        <maven.compiler.release>25</maven.compiler.release>
     </properties>
 
-<!--    Перечисление вложенных модулей: отредактировать-->
+    <!-->
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>8</source>
+                    <target>8</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+    <-->
+
+    <!--    Перечисление вложенных модулей: отредактировать!!!!-->
     <modules>
         <module>backend</module>
-        <module>backend-rest-client</module>
-        <module>client</module>
+        <!--><module>backend-rest-client</module>
+        <module>client</module><-->
     </modules>
 
 </project>
