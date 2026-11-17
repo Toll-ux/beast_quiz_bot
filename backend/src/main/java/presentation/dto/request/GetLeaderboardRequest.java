@@ -1,5 +1,5 @@
 package presentation.dto.request;
 
 public record GetLeaderboardRequest(
-        long userId
+        long telegramId
 ) {}

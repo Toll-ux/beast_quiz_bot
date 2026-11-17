@@ -87,8 +87,8 @@ class QuizRestControllerTest {
     }
 
     @Test
-    @DisplayName("POST /api/start with negative userId returns 400 Bad Request")
-    void startQuizNegativeUserId() throws Exception {
+    @DisplayName("POST /api/start with negative telegramId returns 400 Bad Request")
+    void startQuizNegativetelegramId() throws Exception {
         StartQuizRequest request = new StartQuizRequest(-5, 2);
 
         mockMvc.perform(post("/api/start")
@@ -242,7 +242,7 @@ class QuizRestControllerTest {
         assertNotNull(startResponse.getBody());
         assertTrue(startResponse.getBody().newQuizCreated());
 
-        ResponseEntity<GetCurrentQuestionViewResponse> questionResponse = controller.presentQuestion(new GetCurrentQuestionViewRequest(12345));
+        ResponseEntity<GetCurrentQuestionViewResponse> questionResponse = controller.presentQuestion(12345);
         assertEquals(HttpStatus.OK, questionResponse.getStatusCode());
         assertNotNull(questionResponse.getBody());
         assertEquals(1, questionResponse.getBody().questionId());
@@ -256,7 +256,7 @@ class QuizRestControllerTest {
         assertEquals(HttpStatus.OK, finishResponse.getStatusCode());
         assertNotNull(finishResponse.getBody());
 
-        ResponseEntity<GetLeaderboardResponse> leaderboardResponse = controller.leaderboard(new GetLeaderboardRequest(12345));
+        ResponseEntity<GetLeaderboardResponse> leaderboardResponse = controller.leaderboard(12345);
         assertEquals(HttpStatus.OK, leaderboardResponse.getStatusCode());
         assertNotNull(leaderboardResponse.getBody());
         assertFalse(leaderboardResponse.getBody().leaderboard().isEmpty());
@@ -274,7 +274,7 @@ class QuizRestControllerTest {
         assertTrue(startB.getBody().newQuizCreated());
 
         // User A gets current question
-        ResponseEntity<GetCurrentQuestionViewResponse> qA = controller.presentQuestion(new GetCurrentQuestionViewRequest(12345));
+        ResponseEntity<GetCurrentQuestionViewResponse> qA = controller.presentQuestion(12345);
         assertEquals(1, qA.getBody().questionId());
 
         // User B answers question

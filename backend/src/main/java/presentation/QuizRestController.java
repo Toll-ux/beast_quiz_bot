@@ -40,7 +40,7 @@ public class QuizRestController {
     /** /start - POST запрос
      *
      * @param request - StartQuizRequest
-     *                {"userId": 12345, "questionCount": 2}
+     *                {"telegramId": 12345, "questionCount": 2}
      *
      * @return response - ResponseEntity<StartQuizResponse>
      *     {"newQuizCreated": true}
@@ -53,7 +53,7 @@ public class QuizRestController {
         try {
             /// обработка QAS.start
             success = QAS.start(
-                    request.userId(),
+                    request.telegramId(),
                     request.questionCount());
         } catch (IllegalArgumentException | IllegalStateException e) {
             /// исключение - всегда 400 (badRequest)
@@ -66,7 +66,7 @@ public class QuizRestController {
     /** /abort - POST запрос
      *
      * @param request - AbortQuizRequest
-     *               {"userId": 12345}
+     *               {"telegramId": 12345}
      *
      * @return response - ResponseEntity<AbortQuizResponse>
      *     {"sessionId": 2, "quizScore": 40, "userTotalScore": 50}
@@ -78,7 +78,7 @@ public class QuizRestController {
         /// try catch для возможных ошибок, важно, что кроме IllegalArgumentException и IllegalStateException он не должен обрабатывать
         try {
             /// обработка QAS.abort
-            abortResult = QAS.abort(request.userId());
+            abortResult = QAS.abort(request.telegramId());
         } catch (IllegalArgumentException | IllegalStateException e) {
             /// исключение - всегда 400 (badRequest)
             return ResponseEntity.badRequest().build();
@@ -95,7 +95,7 @@ public class QuizRestController {
     /** /finish - POST запрос
      *
      * @param request - FinishQuizRequest
-     *                {"userId": 12345}
+     *                {"telegramId": 12345}
      *
      * @return response - ResponseEntity<FinishQuizResponse>
      *     {"sessionId": 3, "quizScore": 44, "userTotalScore": 34}
@@ -105,7 +105,7 @@ public class QuizRestController {
         FinishQuizResult finishResult;
         /// try catch для возможных ошибок, важно, что кроме IllegalArgumentException и IllegalStateException он не должен обрабатывать
         try {
-            finishResult = QAS.finish(request.userId());
+            finishResult = QAS.finish(request.telegramId());
         } catch (IllegalArgumentException | IllegalStateException e) {
             /// исключение - всегда 400 (badRequest)
             return ResponseEntity.badRequest().build();
@@ -122,7 +122,7 @@ public class QuizRestController {
     /** \answer - POST запрос
      *
      * @param request - AnswerQuestionRequest
-     *                {	"userId": 12345, "questionId": 2, "chosen": [ 1, 2, 3] }
+     *                {	"telegramId": 12345, "questionId": 2, "chosen": [ 1, 2, 3] }
      *
      * @return response - ResponseEntity<AnswerQuestionResponse>
      *     {"correct": true, "correctAnswers": [1, 3, 4], "currentScore": 44, "finished": true}
@@ -133,7 +133,7 @@ public class QuizRestController {
         /// try catch для возможных ошибок, важно, что кроме IllegalArgumentException и IllegalStateException он не должен обрабатывать
         try {
             ansResult = QAS.answer(
-                    request.userId(),
+                    request.telegramId(),
                     request.questionId(),
                     request.chosen());
         } catch (IllegalArgumentException | IllegalStateException e) {
@@ -152,8 +152,8 @@ public class QuizRestController {
 
     /** current_question - GET запрос
      *
-     * @param request - GetCurrentQuestionViewRequest
-     *                {  "userId": 12345}
+     * @param telegramId
+     *                {  "telegramId": 12345}
      *
      * @return - ResponseEntity<GetCurrentQuestionViewResponse>
      *     {  "questionId": 2, "text": "Какой бог был богом грома в скандинавской мифологии?",
@@ -161,11 +161,11 @@ public class QuizRestController {
      * 	    }
      */
     @GetMapping("/current_question")
-    public ResponseEntity<GetCurrentQuestionViewResponse> presentQuestion(@RequestBody GetCurrentQuestionViewRequest request){
+    public ResponseEntity<GetCurrentQuestionViewResponse> presentQuestion(@RequestParam long telegramId){
         QuestionView currentQuestion;
         /// try catch для возможных ошибок, важно, что кроме IllegalArgumentException и IllegalStateException он не должен обрабатывать
         try {
-            currentQuestion = QAS.presentQuestion(request.userId());
+            currentQuestion = QAS.presentQuestion(telegramId);
         } catch (IllegalArgumentException | IllegalStateException e) {
             /// исключение - всегда 400 (badRequest)
             return ResponseEntity.badRequest().build();
@@ -181,19 +181,18 @@ public class QuizRestController {
 
     /** leaderboard - GET запрос
      *
-     * @param request - GetLeaderboardRequest
-     *                {  "userId": 12345}
+     * @param telegramId - {  "telegramId": 12345}
      *
      * @return response - ResponseEntity<GetLeaderboardResponse>
      *     { "leaderboard": [
      * 	    { "place": 1, "score": 120,"nickname": "Alice" }, ... ]}
      */
     @GetMapping("/leaderboard")
-    public ResponseEntity<GetLeaderboardResponse> leaderboard(@RequestBody GetLeaderboardRequest request){
+    public ResponseEntity<GetLeaderboardResponse> leaderboard(@RequestParam long telegramId){
         List<LeaderboardEntry> leaderboard;
         /// try catch для возможных ошибок, важно, что кроме IllegalArgumentException и IllegalStateException он не должен обрабатывать
         try {
-            leaderboard = QAS.getLeaderBoard(request.userId());
+            leaderboard = QAS.getLeaderBoard(telegramId);
         } catch (IllegalArgumentException | IllegalStateException e) {
             /// исключение - всегда 400 (badRequest)
             return ResponseEntity.badRequest().build();

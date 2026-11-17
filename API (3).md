@@ -15,7 +15,7 @@ Spring и Jackson преобразуют DTO в JSON и обратно
 #### Запрос
 ``` json
 {
-	"userId": 12345
+	"telegramId": 12345
 	"questionCount": 2
 }
 ```
@@ -34,7 +34,7 @@ Spring и Jackson преобразуют DTO в JSON и обратно
 
 ``` json
 {
-	"userId": 12345,
+	"telegramId": 12345,
 	"questionId": 2,
 	"chosen": [ 1, 2, 3]
 }
@@ -55,7 +55,7 @@ Spring и Jackson преобразуют DTO в JSON и обратно
 #### Запрос
 ``` json
 {
-	"userId": 12345
+	"telegramId": 12345
 }
 ```
 #### Ответ
@@ -72,7 +72,7 @@ Spring и Jackson преобразуют DTO в JSON и обратно
 #### Запрос
 ``` json
 {
-	"userId": 12345
+	"telegramId": 12345
 }
 ```
 #### Ответ
@@ -89,7 +89,7 @@ Spring и Jackson преобразуют DTO в JSON и обратно
 #### Запрос
 ``` json
 {
-	"userId": 12345
+	"telegramId": 12345
 }
 ```
 #### Ответ
@@ -110,7 +110,7 @@ Spring и Jackson преобразуют DTO в JSON и обратно
 #### Запрос
 ``` json
 {
-	"userId": 12345
+	"telegramId": 12345
 }
 ```
 #### Ответ 
