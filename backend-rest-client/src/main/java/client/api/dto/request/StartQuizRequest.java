@@ -1,6 +1,6 @@
 package client.api.dto.request;
 
 public record StartQuizRequest(
-        long telegramId,
+        long userId,
         int questionCount
 ) {}

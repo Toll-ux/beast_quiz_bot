@@ -1,0 +1,15 @@
+C:\Users\malts\projects\beast_quiz_bot\backend-rest-client\src\main\java\client\api\BackendRestClient.java
+C:\Users\malts\projects\beast_quiz_bot\backend-rest-client\src\main\java\client\api\dto\request\AbortQuizRequest.java
+C:\Users\malts\projects\beast_quiz_bot\backend-rest-client\src\main\java\client\api\dto\request\AnswerQuestionRequest.java
+C:\Users\malts\projects\beast_quiz_bot\backend-rest-client\src\main\java\client\api\dto\request\FinishQuizRequest.java
+C:\Users\malts\projects\beast_quiz_bot\backend-rest-client\src\main\java\client\api\dto\request\GetCurrentQuestionViewRequest.java
+C:\Users\malts\projects\beast_quiz_bot\backend-rest-client\src\main\java\client\api\dto\request\GetLeaderboardRequest.java
+C:\Users\malts\projects\beast_quiz_bot\backend-rest-client\src\main\java\client\api\dto\request\StartQuizRequest.java
+C:\Users\malts\projects\beast_quiz_bot\backend-rest-client\src\main\java\client\api\dto\response\AbortQuizResponse.java
+C:\Users\malts\projects\beast_quiz_bot\backend-rest-client\src\main\java\client\api\dto\response\AnswerQuestionResponse.java
+C:\Users\malts\projects\beast_quiz_bot\backend-rest-client\src\main\java\client\api\dto\response\FinishQuizResponse.java
+C:\Users\malts\projects\beast_quiz_bot\backend-rest-client\src\main\java\client\api\dto\response\GetCurrentQuestionViewResponse.java
+C:\Users\malts\projects\beast_quiz_bot\backend-rest-client\src\main\java\client\api\dto\response\GetLeaderboardResponse.java
+C:\Users\malts\projects\beast_quiz_bot\backend-rest-client\src\main\java\client\api\dto\response\LeaderboardResponseEntry.java
+C:\Users\malts\projects\beast_quiz_bot\backend-rest-client\src\main\java\client\api\dto\response\StartQuizResponse.java
+C:\Users\malts\projects\beast_quiz_bot\backend-rest-client\src\main\java\client\api\QuizBackendClient.java
