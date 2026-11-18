@@ -195,11 +195,8 @@ class QuizRestControllerTest {
     void currentQuestionMockMvc() throws Exception {
         controller.start(new StartQuizRequest(12345, 2));
 
-        GetCurrentQuestionViewRequest request = new GetCurrentQuestionViewRequest(12345);
-
         mockMvc.perform(get("/api/current_question")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+                        .param("telegramId", "12345"))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -211,11 +208,8 @@ class QuizRestControllerTest {
     @Test
     @DisplayName("GET /api/current_question when no active quiz returns 400 Bad Request")
     void currentQuestionNoActiveQuiz() throws Exception {
-        GetCurrentQuestionViewRequest request = new GetCurrentQuestionViewRequest(12345);
-
         mockMvc.perform(get("/api/current_question")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+                        .param("telegramId", "12345"))
                 .andDo(print())
                 .andExpect(status().isBadRequest());
     }
@@ -223,11 +217,8 @@ class QuizRestControllerTest {
     @Test
     @DisplayName("GET /api/leaderboard returns leaderboard entries")
     void leaderboardMockMvc() throws Exception {
-        GetLeaderboardRequest request = new GetLeaderboardRequest(12345);
-
         mockMvc.perform(get("/api/leaderboard")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+                        .param("telegramId", "12345"))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))

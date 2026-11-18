@@ -5,6 +5,7 @@ import best_quizbot.application.*;
 import best_quizbot.application.port.QuestionRepository;
 import best_quizbot.application.port.QuizRepository;
 import best_quizbot.application.port.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import best_quizbot.presentation.dto.request.*;
 import best_quizbot.presentation.dto.response.*;
@@ -20,6 +21,7 @@ public class QuizRestController {
     private final QuizApplicationService QAS;
 
     /// Инициализация перегрузка Quiz Application Service
+    @Autowired
     QuizRestController(QuizApplicationService QAS){
         this.QAS = QAS;
     }
@@ -161,7 +163,7 @@ public class QuizRestController {
      * 	    }
      */
     @GetMapping("/current_question")
-    public ResponseEntity<GetCurrentQuestionViewResponse> presentQuestion(@RequestParam long telegramId){
+    public ResponseEntity<GetCurrentQuestionViewResponse> presentQuestion(@RequestParam("telegramId") long telegramId){
         QuestionView currentQuestion;
         /// try catch для возможных ошибок, важно, что кроме IllegalArgumentException и IllegalStateException он не должен обрабатывать
         try {
@@ -188,7 +190,7 @@ public class QuizRestController {
      * 	    { "place": 1, "score": 120,"nickname": "Alice" }, ... ]}
      */
     @GetMapping("/leaderboard")
-    public ResponseEntity<GetLeaderboardResponse> leaderboard(@RequestParam long telegramId){
+    public ResponseEntity<GetLeaderboardResponse> leaderboard(@RequestParam("telegramId") long telegramId){
         List<LeaderboardEntry> leaderboard;
         /// try catch для возможных ошибок, важно, что кроме IllegalArgumentException и IllegalStateException он не должен обрабатывать
         try {

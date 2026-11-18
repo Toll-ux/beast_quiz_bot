@@ -3,11 +3,13 @@ package best_quizbot.infrastructure;
 import best_quizbot.application.LeaderboardEntry;
 import best_quizbot.application.port.UserRepository;
 import best_quizbot.domain.User;
+import org.springframework.stereotype.Repository;
 
 import java.util.*;
 
 import static java.util.Comparator.comparingInt;
 
+@Repository
 public class HardcodedUserRepository implements UserRepository {
 
     private final Map<Long, User> users = new HashMap<>();

@@ -2,11 +2,13 @@ package best_quizbot.infrastructure;
 
 import best_quizbot.application.port.QuizRepository;
 import best_quizbot.application.QuizSession;
+import org.springframework.stereotype.Repository;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+@Repository
 public class HardcodedQuizRepository implements QuizRepository{
     /// Ключи - telegram ID пользователей.
     /// Для каждого пользователя хранится не более одной сессии.

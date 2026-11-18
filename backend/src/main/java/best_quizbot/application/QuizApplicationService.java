@@ -3,6 +3,7 @@ package best_quizbot.application;
 import best_quizbot.application.port.QuestionRepository;
 import best_quizbot.application.port.QuizRepository;
 import best_quizbot.application.port.UserRepository;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Set;
@@ -13,6 +14,7 @@ import java.time.Clock;
  * QuizApplicationService - один общий класс для всего сервиса best_quizbot.application
  */
 
+@Service
 public class QuizApplicationService
 {
 

@@ -2,12 +2,14 @@ package best_quizbot.infrastructure;
 
 import best_quizbot.application.port.QuestionRepository;
 import best_quizbot.domain.Question;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Set;
 
+@Repository
 public class HardcodedQuestionRepository implements QuestionRepository{
 
     // id вопросов должны не повторяться
