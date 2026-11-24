@@ -37,7 +37,7 @@ class ClientApplicationTest {
     }
 
     @Test
-    @DisplayName("Client application displays welcome message and menu")
+    @DisplayName("Client best_quizbot.application displays welcome message and menu")
     void testWelcomeMessageAndMenu() {
 
         String input = "12345\nq\n";
@@ -63,7 +63,7 @@ class ClientApplicationTest {
     }
 
     @Test
-    @DisplayName("Client application passes Telegram ID to DialogHandler")
+    @DisplayName("Client best_quizbot.application passes Telegram ID to DialogHandler")
     void testTelegramIdIsPassedToDialogHandler() {
 
         String input = "12345\nq\n";
@@ -86,7 +86,7 @@ class ClientApplicationTest {
     }
 
     @Test
-    @DisplayName("Client application trims whitespace from Telegram ID")
+    @DisplayName("Client best_quizbot.application trims whitespace from Telegram ID")
     void testTelegramIdIsTrimmed() {
 
         String input = "  12345  \nq\n";
@@ -109,7 +109,7 @@ class ClientApplicationTest {
     }
 
     @Test
-    @DisplayName("Client application forwards user messages to DialogHandler")
+    @DisplayName("Client best_quizbot.application forwards user messages to DialogHandler")
     void testUserMessagesAreForwarded() {
 
         String input = "12345\np\nh\nq\n";
@@ -137,7 +137,7 @@ class ClientApplicationTest {
     }
 
     @Test
-    @DisplayName("Client application prints responses from DialogHandler")
+    @DisplayName("Client best_quizbot.application prints responses from DialogHandler")
     void testDialogResponsesArePrinted() {
 
         String input = "12345\np\nh\nq\n";
@@ -165,7 +165,7 @@ class ClientApplicationTest {
     }
 
     @Test
-    @DisplayName("Client application continues until exit is requested")
+    @DisplayName("Client best_quizbot.application continues until exit is requested")
     void testApplicationContinuesUntilExitRequested() {
 
         String input = "12345\np\nh\nq\n";
@@ -191,7 +191,7 @@ class ClientApplicationTest {
     }
 
     @Test
-    @DisplayName("Client application stops processing messages after exit is requested")
+    @DisplayName("Client best_quizbot.application stops processing messages after exit is requested")
     void testApplicationStopsAfterExitRequested() {
 
         String input = "12345\nq\np\nh\n";
@@ -211,7 +211,7 @@ class ClientApplicationTest {
     }
 
     @Test
-    @DisplayName("Client application creates DialogHandler only once")
+    @DisplayName("Client best_quizbot.application creates DialogHandler only once")
     void testDialogHandlerIsCreatedOnlyOnce() {
 
         String input = "12345\np\nh\nq\n";
@@ -240,7 +240,7 @@ class ClientApplicationTest {
     }
 
     @Test
-    @DisplayName("Client application throws exception when Telegram ID is invalid")
+    @DisplayName("Client best_quizbot.application throws exception when Telegram ID is invalid")
     void testInvalidTelegramId() {
 
         String input = "invalid_id\n";

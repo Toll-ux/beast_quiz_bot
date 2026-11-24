@@ -1,8 +1,8 @@
 package client;
 
-import client.api.BackendRestClient;
 import client.dialog.DialogHandler;
 import client.dialog.DialogResponse;
+import config.ClientConfig;
 
 import java.io.InputStream;
 import java.io.PrintStream;
@@ -20,7 +20,7 @@ public class ClientApplication {
     public static void main(String[] args) {
         run(System.in, System.out, telegramId ->
                 new DialogHandler(
-                        new BackendRestClient("http://localhost:8080"),
+                        ClientConfig.createBackendRestClient(),
                         telegramId
                 )
         );
