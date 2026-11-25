@@ -17,10 +17,13 @@ import java.util.function.Function;
  */
 public class ClientApplication {
 
+     static String defaultUrl = "http://localhost:8082";
+
     public static void main(String[] args) {
+        String url = (args.length > 0) ? args[0]: defaultUrl;
         run(System.in, System.out, telegramId ->
                 new DialogHandler(
-                        ClientConfig.createBackendRestClient(),
+                        ClientConfig.createBackendRestClient(url),
                         telegramId
                 )
         );
