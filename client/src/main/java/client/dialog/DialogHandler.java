@@ -125,8 +125,16 @@ public class DialogHandler {
 
         /// На запрос о начале квиза приходит ответ, создан ли новый квиз или используется существующий незавершенный
         /// Пока никак не используется
-        StartQuizResponse startResponse =
-                backendRestClient.startQuiz(telegramId, questionCount);
+        StartQuizResponse startResponse;
+        try {
+            startResponse =
+                    backendRestClient.startQuiz(telegramId, questionCount);
+        } catch (IllegalArgumentException e) {
+            return new DialogResponse(
+                    "An error occurred while starting the quiz. Please try again.",
+                    false
+            );
+        }
 
         /// Переход в режим ответа на вопрос - после удачного начала пользователю сразу показывают первый.
         state = DialogState.ANSWERING_QUESTION;
@@ -139,8 +147,15 @@ public class DialogHandler {
      * @return ответ с вопросом и вариантами ответов на него + просьбой ввести номера ответов.
      */
     private DialogResponse getCurrentQuestionMessage() {
-        GetCurrentQuestionViewResponse question =
-                backendRestClient.getCurrentQuestion(telegramId);
+        GetCurrentQuestionViewResponse question;
+        try {
+            question = backendRestClient.getCurrentQuestion(telegramId);
+        } catch (Exception e) {
+            return new DialogResponse(
+                    "An error occurred while fetching the question. Please try again.",
+                    false
+            );
+        }
 
         currentQuestionId = question.questionId();
         currentQuestionAnswersCount = question.answers().size();
@@ -196,12 +211,19 @@ public class DialogHandler {
             );
         }
 
-        AnswerQuestionResponse result =
-                backendRestClient.answerQuestion(
-                        telegramId,
-                        (int) currentQuestionId,
-                        chosenAnswers
-                );
+        AnswerQuestionResponse result;
+        try {
+            result = backendRestClient.answerQuestion(
+                    telegramId,
+                    (int) currentQuestionId,
+                    chosenAnswers
+            );
+        } catch (Exception e) {
+            return new DialogResponse(
+                    "An error occurred while submitting your answer. Please try again.",
+                    false
+            );
+        }
 
         /// Формирование текста результата ответа на вопрос
         StringBuilder message = new StringBuilder();
@@ -221,8 +243,15 @@ public class DialogHandler {
 
         /// Завершение квиза, если вопрос был последний
         if (result.finished()) {
-            FinishQuizResponse finishResult =
-                    backendRestClient.finishQuiz(telegramId);
+            FinishQuizResponse finishResult;
+            try {
+                finishResult = backendRestClient.finishQuiz(telegramId);
+            } catch (Exception e) {
+                return new DialogResponse(
+                        "An error occurred while finishing the quiz. Please try again.",
+                        false
+                );
+            }
 
             state = DialogState.MAIN_MENU;
 
@@ -285,10 +314,11 @@ public class DialogHandler {
      * иначе ответ-сообщение с содержимым доски лидеров.
      */
     private DialogResponse showLeaderboard() {
-        GetLeaderboardResponse response =
-                backendRestClient.getLeaderboard(telegramId);
+        GetLeaderboardResponse response;
 
-        if (response.leaderboard().isEmpty()) {
+        try{
+            response = backendRestClient.getLeaderboard(telegramId);
+        } catch (IllegalArgumentException e){
             return new DialogResponse(
                     "Apparently you can be first in our repository!",
                     false

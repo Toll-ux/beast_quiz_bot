@@ -28,7 +28,7 @@ public class BackendRestClient implements QuizBackendClient
      * @param questionCount количество вопросов в новом кваизе
      * @return StartQuizResponse, содержащий информацию об успешном начале квиза
      */
-    public StartQuizResponse startQuiz(long telegramId, int questionCount) {
+    public StartQuizResponse startQuiz(long telegramId, int questionCount) throws IllegalArgumentException {
         StartQuizRequest request = new StartQuizRequest(telegramId, questionCount);
 
         /// Строим запрос
@@ -37,6 +37,10 @@ public class BackendRestClient implements QuizBackendClient
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(request)
                 .retrieve()
+                .onStatus(status -> status.value() != 200, (req, res) -> {
+                    throw new IllegalArgumentException("Invalid response for start quiz request: " + res.getStatusCode()
+                            + " - " + res.getStatusText());
+                })
                 .body(StartQuizResponse.class);
     }
 
@@ -50,7 +54,7 @@ public class BackendRestClient implements QuizBackendClient
      * @return AnswerQuestionResponse, содержащий инфо об успехе/неудаче юзера в ответе
      * и правильные варианты на отвеченный вопрос
      */
-    public AnswerQuestionResponse answerQuestion(long telegramId, int questionId, Set<Integer> chosen) {
+    public AnswerQuestionResponse answerQuestion(long telegramId, int questionId, Set<Integer> chosen) throws IllegalArgumentException {
         AnswerQuestionRequest request = new AnswerQuestionRequest(telegramId, questionId, chosen);
 
         /// Строим запрос
@@ -59,6 +63,10 @@ public class BackendRestClient implements QuizBackendClient
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(request)
                 .retrieve()
+                .onStatus(status -> status.value() != 200, (req, res) -> {
+                    throw new IllegalArgumentException("Invalid response for answer question request: " + res.getStatusCode()
+                            + " - " + res.getStatusText());
+                })
                 .body(AnswerQuestionResponse.class);
     }
 
@@ -68,7 +76,7 @@ public class BackendRestClient implements QuizBackendClient
      * @param telegramId - телеграм ИД юзера
      * @return GetCurrentQuestionViewResponse, содержащий информацию о следующем вопросе (обзор вопроса)
      */
-    public GetCurrentQuestionViewResponse getCurrentQuestion(long telegramId) {
+    public GetCurrentQuestionViewResponse getCurrentQuestion(long telegramId) throws IllegalArgumentException {
 
         /// Строим запрос
         return restClient.get()
@@ -77,6 +85,10 @@ public class BackendRestClient implements QuizBackendClient
                         .queryParam("telegramId", telegramId)
                         .build())
                 .retrieve()
+                .onStatus(status -> status.value() != 200, (req, res) -> {
+                    throw new IllegalArgumentException("Invalid response for getCurrentQuestion request: " + res.getStatusCode()
+                            + " - " + res.getStatusText());
+                })
                 .body(GetCurrentQuestionViewResponse.class);
     }
 
@@ -86,7 +98,7 @@ public class BackendRestClient implements QuizBackendClient
      * @param telegramId - телеграм ИД юзера
      * @return AbortQuizResponse, содержащий информацию о квизе - счет за квиз, обновленный счет юзера после квиза
      */
-    public AbortQuizResponse abortQuiz(long telegramId) {
+    public AbortQuizResponse abortQuiz(long telegramId) throws IllegalArgumentException {
         AbortQuizRequest request = new AbortQuizRequest(telegramId);
 
         /// Строим запрос
@@ -95,6 +107,10 @@ public class BackendRestClient implements QuizBackendClient
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(request)
                 .retrieve()
+                .onStatus(status -> status.value() != 200, (req, res) -> {
+                    throw new IllegalArgumentException("Invalid response for abort quiz request: " + res.getStatusCode()
+                            + " - " + res.getStatusText());
+                })
                 .body(AbortQuizResponse.class);
     }
 
@@ -104,7 +120,7 @@ public class BackendRestClient implements QuizBackendClient
      * @param telegramId - телеграм ИД юзера
      * @return FinishQuizResponse, содержащий информацию о квизе - счет за квиз, обновленный счет юзера после квиза
      */
-    public FinishQuizResponse finishQuiz(long telegramId) {
+    public FinishQuizResponse finishQuiz(long telegramId) throws IllegalArgumentException {
         FinishQuizRequest request = new FinishQuizRequest(telegramId);
 
         /// Строим запрос
@@ -113,6 +129,10 @@ public class BackendRestClient implements QuizBackendClient
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(request)
                 .retrieve()
+                .onStatus(status -> status.value() != 200, (req, res) -> {
+                    throw new IllegalArgumentException("Invalid response for finish quiz request: " + res.getStatusCode()
+                            + " - " + res.getStatusText());
+                })
                 .body(FinishQuizResponse.class);
     }
 
@@ -122,7 +142,7 @@ public class BackendRestClient implements QuizBackendClient
      * @param telegramId - телеграм ИД юзера
      * @return GetLeaderboardResponse с информацией из таблицы лидеров (топ юзеров + положение юзера в таблице лидеров)
      */
-    public GetLeaderboardResponse getLeaderboard(long telegramId) {
+    public GetLeaderboardResponse getLeaderboard(long telegramId) throws IllegalArgumentException {
 
         /// Строим запрос
         return restClient.get()
@@ -131,6 +151,10 @@ public class BackendRestClient implements QuizBackendClient
                         .queryParam("telegramId", telegramId)
                         .build())
                 .retrieve()
+                .onStatus(status -> status.value() != 200, (req, res) -> {
+                    throw new IllegalArgumentException("Invalid response for leaderboard request: " + res.getStatusCode()
+                    + " - " + res.getStatusText());
+                })
                 .body(GetLeaderboardResponse.class);
     }
 }
