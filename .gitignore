@@ -24,7 +24,17 @@ hs_err_pid*
 replay_pid*
 
 .DS_Store
+#idea files
 /.idea
-/backend/out
+
+# Maven junks
 /backend/target
-Распределение работы.md
+/client/target
+/backend-rest-client/target
+
+# java output
+/backend/out
+/client/out
+
+#db data
+backend/data/
