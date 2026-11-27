@@ -4,6 +4,7 @@ package client.api;
 import client.api.dto.request.*;
 import client.api.dto.response.*;
 import org.springframework.http.MediaType;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClient;
 
 import java.util.Set;
@@ -28,7 +29,8 @@ public class BackendRestClient implements QuizBackendClient
      * @param questionCount количество вопросов в новом кваизе
      * @return StartQuizResponse, содержащий информацию об успешном начале квиза
      */
-    public StartQuizResponse startQuiz(long telegramId, int questionCount) throws IllegalArgumentException {
+    @Override
+    public StartQuizResponse startQuiz(long telegramId, int questionCount) throws HttpClientErrorException {
         StartQuizRequest request = new StartQuizRequest(telegramId, questionCount);
 
         /// Строим запрос
@@ -38,8 +40,14 @@ public class BackendRestClient implements QuizBackendClient
                 .body(request)
                 .retrieve()
                 .onStatus(status -> status.value() != 200, (req, res) -> {
-                    throw new IllegalArgumentException("Invalid response for start quiz request: " + res.getStatusCode()
-                            + " - " + res.getStatusText());
+                    throw HttpClientErrorException.create(
+                            res.getStatusCode(),
+                            "Invalid response for start quiz request: " + res.getStatusCode()
+                                    + " - " + res.getStatusText(),
+                            res.getHeaders(),
+                            null,
+                            null
+                    );
                 })
                 .body(StartQuizResponse.class);
     }
@@ -54,7 +62,8 @@ public class BackendRestClient implements QuizBackendClient
      * @return AnswerQuestionResponse, содержащий инфо об успехе/неудаче юзера в ответе
      * и правильные варианты на отвеченный вопрос
      */
-    public AnswerQuestionResponse answerQuestion(long telegramId, int questionId, Set<Integer> chosen) throws IllegalArgumentException {
+    @Override
+    public AnswerQuestionResponse answerQuestion(long telegramId, int questionId, Set<Integer> chosen) throws HttpClientErrorException {
         AnswerQuestionRequest request = new AnswerQuestionRequest(telegramId, questionId, chosen);
 
         /// Строим запрос
@@ -64,8 +73,14 @@ public class BackendRestClient implements QuizBackendClient
                 .body(request)
                 .retrieve()
                 .onStatus(status -> status.value() != 200, (req, res) -> {
-                    throw new IllegalArgumentException("Invalid response for answer question request: " + res.getStatusCode()
-                            + " - " + res.getStatusText());
+                    throw  HttpClientErrorException.create(
+                            res.getStatusCode(),
+                            "Invalid response for answer question request: " + res.getStatusCode()
+                                    + " - " + res.getStatusText(),
+                            res.getHeaders(),
+                            null,
+                            null
+                    );
                 })
                 .body(AnswerQuestionResponse.class);
     }
@@ -76,7 +91,8 @@ public class BackendRestClient implements QuizBackendClient
      * @param telegramId - телеграм ИД юзера
      * @return GetCurrentQuestionViewResponse, содержащий информацию о следующем вопросе (обзор вопроса)
      */
-    public GetCurrentQuestionViewResponse getCurrentQuestion(long telegramId) throws IllegalArgumentException {
+    @Override
+    public GetCurrentQuestionViewResponse getCurrentQuestion(long telegramId) throws HttpClientErrorException {
 
         /// Строим запрос
         return restClient.get()
@@ -86,8 +102,14 @@ public class BackendRestClient implements QuizBackendClient
                         .build())
                 .retrieve()
                 .onStatus(status -> status.value() != 200, (req, res) -> {
-                    throw new IllegalArgumentException("Invalid response for getCurrentQuestion request: " + res.getStatusCode()
-                            + " - " + res.getStatusText());
+                    throw  HttpClientErrorException.create(
+                            res.getStatusCode(),
+                            "Invalid response for getCurrentQuestion request: " + res.getStatusCode()
+                                    + " - " + res.getStatusText(),
+                            res.getHeaders(),
+                            null,
+                            null
+                    );
                 })
                 .body(GetCurrentQuestionViewResponse.class);
     }
@@ -98,7 +120,8 @@ public class BackendRestClient implements QuizBackendClient
      * @param telegramId - телеграм ИД юзера
      * @return AbortQuizResponse, содержащий информацию о квизе - счет за квиз, обновленный счет юзера после квиза
      */
-    public AbortQuizResponse abortQuiz(long telegramId) throws IllegalArgumentException {
+    @Override
+    public AbortQuizResponse abortQuiz(long telegramId) throws HttpClientErrorException {
         AbortQuizRequest request = new AbortQuizRequest(telegramId);
 
         /// Строим запрос
@@ -108,8 +131,14 @@ public class BackendRestClient implements QuizBackendClient
                 .body(request)
                 .retrieve()
                 .onStatus(status -> status.value() != 200, (req, res) -> {
-                    throw new IllegalArgumentException("Invalid response for abort quiz request: " + res.getStatusCode()
-                            + " - " + res.getStatusText());
+                    throw  HttpClientErrorException.create(
+                            res.getStatusCode(),
+                            "Invalid response for abort quiz request: " + res.getStatusCode()
+                                    + " - " + res.getStatusText(),
+                            res.getHeaders(),
+                            null,
+                            null
+                    );
                 })
                 .body(AbortQuizResponse.class);
     }
@@ -120,7 +149,8 @@ public class BackendRestClient implements QuizBackendClient
      * @param telegramId - телеграм ИД юзера
      * @return FinishQuizResponse, содержащий информацию о квизе - счет за квиз, обновленный счет юзера после квиза
      */
-    public FinishQuizResponse finishQuiz(long telegramId) throws IllegalArgumentException {
+    @Override
+    public FinishQuizResponse finishQuiz(long telegramId) throws HttpClientErrorException {
         FinishQuizRequest request = new FinishQuizRequest(telegramId);
 
         /// Строим запрос
@@ -130,8 +160,14 @@ public class BackendRestClient implements QuizBackendClient
                 .body(request)
                 .retrieve()
                 .onStatus(status -> status.value() != 200, (req, res) -> {
-                    throw new IllegalArgumentException("Invalid response for finish quiz request: " + res.getStatusCode()
-                            + " - " + res.getStatusText());
+                    throw  HttpClientErrorException.create(
+                            res.getStatusCode(),
+                            "Invalid response for finish quiz request: " + res.getStatusCode()
+                                    + " - " + res.getStatusText(),
+                            res.getHeaders(),
+                            null,
+                            null
+                    );
                 })
                 .body(FinishQuizResponse.class);
     }
@@ -142,7 +178,8 @@ public class BackendRestClient implements QuizBackendClient
      * @param telegramId - телеграм ИД юзера
      * @return GetLeaderboardResponse с информацией из таблицы лидеров (топ юзеров + положение юзера в таблице лидеров)
      */
-    public GetLeaderboardResponse getLeaderboard(long telegramId) throws IllegalArgumentException {
+    @Override
+    public GetLeaderboardResponse getLeaderboard(long telegramId) throws HttpClientErrorException {
 
         /// Строим запрос
         return restClient.get()
@@ -152,8 +189,14 @@ public class BackendRestClient implements QuizBackendClient
                         .build())
                 .retrieve()
                 .onStatus(status -> status.value() != 200, (req, res) -> {
-                    throw new IllegalArgumentException("Invalid response for leaderboard request: " + res.getStatusCode()
-                    + " - " + res.getStatusText());
+                    throw  HttpClientErrorException.create(
+                            res.getStatusCode(),
+                            "Invalid response for leaderboard request: " + res.getStatusCode()
+                                    + " - " + res.getStatusText(),
+                            res.getHeaders(),
+                            null,
+                            null
+                    );
                 })
                 .body(GetLeaderboardResponse.class);
     }
