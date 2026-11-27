@@ -1,12 +1,14 @@
 
 package client.dialog;
 
-import client.api.BackendRestClient;
+import client.api.QuizBackendClient;
 import client.api.dto.response.*;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.client.HttpClientErrorException;
 
 import java.util.List;
 import java.util.Set;
@@ -18,13 +20,13 @@ class DialogHandlerTest {
 
     private static final long TELEGRAM_ID = 12345L;
 
-    private BackendRestClient backendRestClient;
+    private QuizBackendClient quizBackendClient;
     private DialogHandler dialogHandler;
 
     @BeforeEach
     void setUp() {
-        backendRestClient = mock(BackendRestClient.class);
-        dialogHandler = new DialogHandler(backendRestClient, TELEGRAM_ID);
+        quizBackendClient = mock(QuizBackendClient.class);
+        dialogHandler = new DialogHandler(quizBackendClient, TELEGRAM_ID);
     }
 
     // -------------------- MAIN MENU --------------------
@@ -37,7 +39,7 @@ class DialogHandlerTest {
         assertEquals("Please enter a message.", response.message());
         assertFalse(response.exitRequested());
 
-        verifyNoInteractions(backendRestClient);
+        verifyNoInteractions(quizBackendClient);
     }
 
     @DisplayName("Ответ на ввод неизвестной команды")
@@ -51,7 +53,7 @@ class DialogHandlerTest {
         );
         assertFalse(response.exitRequested());
 
-        verifyNoInteractions(backendRestClient);
+        verifyNoInteractions(quizBackendClient);
     }
 
     @DisplayName("Правильная работа команды q")
@@ -62,7 +64,7 @@ class DialogHandlerTest {
         assertEquals("Goodbye!", response.message());
         assertTrue(response.exitRequested());
 
-        verifyNoInteractions(backendRestClient);
+        verifyNoInteractions(quizBackendClient);
     }
 
     @DisplayName("Правильная работа команды h")
@@ -74,7 +76,7 @@ class DialogHandlerTest {
         assertTrue(response.message().contains("play quiz"));
         assertFalse(response.exitRequested());
 
-        verifyNoInteractions(backendRestClient);
+        verifyNoInteractions(quizBackendClient);
     }
 
     @DisplayName("Правильная обработка команды с лишними пробелами и верхним регистром")
@@ -85,7 +87,7 @@ class DialogHandlerTest {
         assertTrue(response.message().contains("Available commands:"));
         assertFalse(response.exitRequested());
 
-        verifyNoInteractions(backendRestClient);
+        verifyNoInteractions(quizBackendClient);
     }
 
     @DisplayName("Смена состояния на WAITING_FOR_QUESTION_COUNT при вводе команды p")
@@ -99,7 +101,7 @@ class DialogHandlerTest {
         );
         assertFalse(response.exitRequested());
 
-        verifyNoInteractions(backendRestClient);
+        verifyNoInteractions(quizBackendClient);
     }
 
     // -------------------- QUESTION COUNT --------------------
@@ -116,7 +118,7 @@ class DialogHandlerTest {
                 response.message()
         );
 
-        verifyNoInteractions(backendRestClient);
+        verifyNoInteractions(quizBackendClient);
     }
 
     @DisplayName("Ввод 0 при WAITING_FOR_QUESTION_COUNT")
@@ -131,7 +133,7 @@ class DialogHandlerTest {
                 response.message()
         );
 
-        verifyNoInteractions(backendRestClient);
+        verifyNoInteractions(quizBackendClient);
     }
 
     @DisplayName("Ввод числа вопросов большего чем в базе вопросов (сейчас -4)")
@@ -146,7 +148,47 @@ class DialogHandlerTest {
                 response.message()
         );
 
-        verifyNoInteractions(backendRestClient);
+        verifyNoInteractions(quizBackendClient);
+    }
+
+    @DisplayName("Показывает ошибку, если backend отклонил запуск квиза")
+    @Test
+    void handleQuestionCount_startQuizReturnsBadRequest_returnsErrorMessage() {
+        when(quizBackendClient.startQuiz(TELEGRAM_ID, 2))
+                .thenThrow(new HttpClientErrorException(HttpStatus.BAD_REQUEST));
+
+        dialogHandler.handleMessage("p");
+        DialogResponse response = dialogHandler.handleMessage("2");
+
+        assertEquals(
+                "An error occurred while starting the quiz. Please try again.",
+                response.message()
+        );
+        assertFalse(response.exitRequested());
+
+        verify(quizBackendClient).startQuiz(TELEGRAM_ID, 2);
+        verify(quizBackendClient, never()).getCurrentQuestion(TELEGRAM_ID);
+    }
+
+    @DisplayName("Показывает ошибку, если backend вернул 400 при получении вопроса")
+    @Test
+    void handleQuestionCount_getCurrentQuestionReturnsBadRequest_returnsErrorMessage() {
+        when(quizBackendClient.startQuiz(TELEGRAM_ID, 2))
+                .thenReturn(new StartQuizResponse(true));
+        when(quizBackendClient.getCurrentQuestion(TELEGRAM_ID))
+                .thenThrow(new HttpClientErrorException(HttpStatus.BAD_REQUEST));
+
+        dialogHandler.handleMessage("p");
+        DialogResponse response = dialogHandler.handleMessage("2");
+
+        assertEquals(
+                "An error occurred while fetching the question. Please try again.",
+                response.message()
+        );
+        assertFalse(response.exitRequested());
+
+        verify(quizBackendClient).startQuiz(TELEGRAM_ID, 2);
+        verify(quizBackendClient).getCurrentQuestion(TELEGRAM_ID);
     }
 
     @DisplayName("Начинает квиз и показывает первый вопрос")
@@ -154,7 +196,7 @@ class DialogHandlerTest {
     void handleQuestionCount_validInput_startsQuizAndShowsFirstQuestion() {
         GetCurrentQuestionViewResponse question = createQuestion();
 
-        when(backendRestClient.getCurrentQuestion(TELEGRAM_ID))
+        when(quizBackendClient.getCurrentQuestion(TELEGRAM_ID))
                 .thenReturn(question);
 
         dialogHandler.handleMessage("p");
@@ -168,8 +210,8 @@ class DialogHandlerTest {
                 "Enter the number(s) of your answer."
         ));
 
-        verify(backendRestClient).startQuiz(TELEGRAM_ID, 2);
-        verify(backendRestClient).getCurrentQuestion(TELEGRAM_ID);
+        verify(quizBackendClient).startQuiz(TELEGRAM_ID, 2);
+        verify(quizBackendClient).getCurrentQuestion(TELEGRAM_ID);
     }
 
     // -------------------- ANSWERS --------------------
@@ -186,7 +228,7 @@ class DialogHandlerTest {
                 response.message()
         );
 
-        verify(backendRestClient, never())
+        verify(quizBackendClient, never())
                 .answerQuestion(anyLong(), anyInt(), anySet());
     }
 
@@ -202,7 +244,7 @@ class DialogHandlerTest {
                 response.message()
         );
 
-        verify(backendRestClient, never())
+        verify(quizBackendClient, never())
                 .answerQuestion(anyLong(), anyInt(), anySet());
     }
 
@@ -218,7 +260,7 @@ class DialogHandlerTest {
                 response.message()
         );
 
-        verify(backendRestClient, never())
+        verify(quizBackendClient, never())
                 .answerQuestion(anyLong(), anyInt(), anySet());
     }
 
@@ -233,13 +275,13 @@ class DialogHandlerTest {
                         List.of("Programming language", "Animal")
                 );
 
-        when(backendRestClient.getCurrentQuestion(TELEGRAM_ID))
+        when(quizBackendClient.getCurrentQuestion(TELEGRAM_ID))
                 .thenReturn(firstQuestion, secondQuestion);
 
         AnswerQuestionResponse answerResult =
                 new AnswerQuestionResponse(true, List.of(0), 0, false);
 
-        when(backendRestClient.answerQuestion(
+        when(quizBackendClient.answerQuestion(
                 eq(TELEGRAM_ID),
                 eq(100),
                 eq(Set.of(0))
@@ -255,10 +297,10 @@ class DialogHandlerTest {
         ));
         assertTrue(response.message().contains("What is Python?"));
 
-        verify(backendRestClient).answerQuestion(
+        verify(quizBackendClient).answerQuestion(
                 TELEGRAM_ID, 100, Set.of(0)
         );
-        verify(backendRestClient, times(2))
+        verify(quizBackendClient, times(2))
                 .getCurrentQuestion(TELEGRAM_ID);
     }
 
@@ -273,13 +315,13 @@ class DialogHandlerTest {
                         List.of("Programming language", "Animal")
                 );
 
-        when(backendRestClient.getCurrentQuestion(TELEGRAM_ID))
+        when(quizBackendClient.getCurrentQuestion(TELEGRAM_ID))
                 .thenReturn(firstQuestion, secondQuestion);
 
         AnswerQuestionResponse answerResult =
                 new AnswerQuestionResponse(false, List.of(1), 0, false);
 
-        when(backendRestClient.answerQuestion(
+        when(quizBackendClient.answerQuestion(
                 eq(TELEGRAM_ID),
                 eq(100),
                 eq(Set.of(1))
@@ -299,10 +341,10 @@ class DialogHandlerTest {
     @DisplayName("Правильная обработка ответа из нескольких вариантов")
     @Test
     void handleAnswer_multipleAnswers_areParsedAndSentToBackend() {
-        when(backendRestClient.getCurrentQuestion(TELEGRAM_ID))
+        when(quizBackendClient.getCurrentQuestion(TELEGRAM_ID))
                 .thenReturn(createQuestion());
 
-        when(backendRestClient.answerQuestion(
+        when(quizBackendClient.answerQuestion(
                 eq(TELEGRAM_ID),
                 eq(100),
                 eq(Set.of(0, 1))
@@ -315,12 +357,12 @@ class DialogHandlerTest {
         dialogHandler.handleMessage("2");
 
         // Ответ из двух вариантов
-        when(backendRestClient.getCurrentQuestion(TELEGRAM_ID))
+        when(quizBackendClient.getCurrentQuestion(TELEGRAM_ID))
                 .thenReturn(createQuestion());
 
         dialogHandler.handleMessage("1, 2");
 
-        verify(backendRestClient).answerQuestion(
+        verify(quizBackendClient).answerQuestion(
                 TELEGRAM_ID, 100, Set.of(0, 1)
         );
     }
@@ -328,10 +370,10 @@ class DialogHandlerTest {
     @DisplayName("Вывод при завершении квиза")
     @Test
     void handleAnswer_finishedQuiz_showsFinalScoreAndReturnsToMenu() {
-        when(backendRestClient.getCurrentQuestion(TELEGRAM_ID))
+        when(quizBackendClient.getCurrentQuestion(TELEGRAM_ID))
                 .thenReturn(createQuestion());
 
-        when(backendRestClient.answerQuestion(
+        when(quizBackendClient.answerQuestion(
                 eq(TELEGRAM_ID),
                 eq(100),
                 eq(Set.of(0))
@@ -339,7 +381,7 @@ class DialogHandlerTest {
                 new AnswerQuestionResponse(true, List.of(0), 0, true)
         );
 
-        when(backendRestClient.finishQuiz(TELEGRAM_ID))
+        when(quizBackendClient.finishQuiz(TELEGRAM_ID))
                 .thenReturn(new FinishQuizResponse(10, 10, 50));
 
         dialogHandler.handleMessage("p");
@@ -352,7 +394,7 @@ class DialogHandlerTest {
         assertTrue(response.message().contains("Your total score: 50"));
         assertTrue(response.message().contains("Choose an action:"));
 
-        verify(backendRestClient).finishQuiz(TELEGRAM_ID);
+        verify(quizBackendClient).finishQuiz(TELEGRAM_ID);
 
         // Проверяем, что после завершения квиза снова доступно главное меню
         DialogResponse menuResponse = dialogHandler.handleMessage("q");
@@ -366,8 +408,8 @@ class DialogHandlerTest {
     @DisplayName("Вывод доски лидеров: в репозитории еще нет пользователей")
     @Test
     void showLeaderboard_emptyLeaderboard_returnsFirstPlaceMessage() {
-        when(backendRestClient.getLeaderboard(TELEGRAM_ID))
-                .thenReturn(new GetLeaderboardResponse(List.of()));
+        when(quizBackendClient.getLeaderboard(TELEGRAM_ID))
+                .thenThrow(new HttpClientErrorException(HttpStatus.BAD_REQUEST));
 
         DialogResponse response = dialogHandler.handleMessage("l");
 
@@ -385,7 +427,7 @@ class DialogHandlerTest {
                 new LeaderboardResponseEntry(2, 80, "Bob" )
         );
 
-        when(backendRestClient.getLeaderboard(TELEGRAM_ID))
+        when(quizBackendClient.getLeaderboard(TELEGRAM_ID))
                 .thenReturn(new GetLeaderboardResponse(entries));
 
         DialogResponse response = dialogHandler.handleMessage("l");
@@ -411,7 +453,7 @@ class DialogHandlerTest {
     }
 
     private void startQuizAndShowQuestion() {
-        when(backendRestClient.getCurrentQuestion(TELEGRAM_ID))
+        when(quizBackendClient.getCurrentQuestion(TELEGRAM_ID))
                 .thenReturn(createQuestion());
 
         dialogHandler.handleMessage("p");
