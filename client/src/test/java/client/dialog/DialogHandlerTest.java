@@ -264,6 +264,23 @@ class DialogHandlerTest {
                 .answerQuestion(anyLong(), anyInt(), anySet());
     }
 
+    @DisplayName("Показывает ошибку, если backend вернул 400 при отправке ответа")
+    @Test
+    void handleAnswer_answerQuestionReturnsBadRequest_returnsErrorMessage() {
+        startQuizAndShowQuestion();
+        when(quizBackendClient.answerQuestion(TELEGRAM_ID, 100, Set.of(0)))
+                .thenThrow(new HttpClientErrorException(HttpStatus.BAD_REQUEST));
+
+        DialogResponse response = dialogHandler.handleMessage("1");
+
+        assertEquals(
+                "An error occurred while submitting your answer. Please try again.",
+                response.message()
+        );
+        assertFalse(response.exitRequested());
+        verify(quizBackendClient, times(1)).getCurrentQuestion(TELEGRAM_ID);
+    }
+
     @DisplayName("Вывод при праввильном ответе на вопрос")
     @Test
     void handleAnswer_correctAnswer_showsSuccessAndNextQuestion() {
@@ -401,6 +418,28 @@ class DialogHandlerTest {
 
         assertTrue(menuResponse.exitRequested());
         assertEquals("Goodbye!", menuResponse.message());
+    }
+
+    @DisplayName("Показывает ошибку, если backend вернул 400 при завершении квиза")
+    @Test
+    void handleAnswer_finishQuizReturnsBadRequest_returnsErrorMessage() {
+        when(quizBackendClient.answerQuestion(
+                eq(TELEGRAM_ID),
+                eq(100),
+                eq(Set.of(0))
+        )).thenReturn(new AnswerQuestionResponse(true, List.of(0), 0, true));
+        when(quizBackendClient.finishQuiz(TELEGRAM_ID))
+                .thenThrow(new HttpClientErrorException(HttpStatus.BAD_REQUEST));
+
+        startQuizAndShowQuestion();
+        DialogResponse response = dialogHandler.handleMessage("1");
+
+        assertEquals(
+                "An error occurred while finishing the quiz. Please try again.",
+                response.message()
+        );
+        assertFalse(response.exitRequested());
+        verify(quizBackendClient).finishQuiz(TELEGRAM_ID);
     }
 
     // -------------------- LEADERBOARD --------------------
