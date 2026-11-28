@@ -4,7 +4,7 @@
 -- исключительно своей сессии (quiz_session_questions и answer_results по цепочке от quiz_sessions:
 -- удаление сессии должно убирать её собственные дочерние строки).
 
-CREATE TABLE users (
+CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     telegram_id integer UNIQUE,
     username text,
@@ -17,12 +17,12 @@ CREATE TABLE users (
     CONSTRAINT users_is_real_boolean CHECK (is_user_real IN (0, 1)),
     CONSTRAINT users_real_telegram_id_consistency CHECK
       (((is_user_real = 1 AND telegram_id IS NOT NULL AND telegram_id > 0) OR (is_user_real = 0 AND telegram_id IS NULL)))
-);
+)@@
 
-CREATE TABLE questions (
+CREATE TABLE IF NOT EXISTS questions (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     text text NOT NULL
-);
+)@@
 
 -- Минимум вариантов ответа и наличие хотя бы одного правильного варианта уже проверяется в домене
 -- (Question.java: answers и correctAnswerIndexes не могут быть пустыми при создании вопроса).
@@ -31,7 +31,7 @@ CREATE TABLE questions (
 -- DEFERRED - констрейнтов (которых в SQLite нет). Когда появится настоящий репозиторий (замена
 -- HardcodedQuestionRepository), эквивалентную проверку нужно делать в репозитории/сервисе перед
 -- записью набора вариантов, а не триггером.
-CREATE TABLE question_answers (
+CREATE TABLE IF NOT EXISTS question_answers (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     question_id integer NOT NULL,
     position integer NOT NULL,
@@ -42,10 +42,10 @@ CREATE TABLE question_answers (
     UNIQUE (question_id, position),
     UNIQUE (question_id, id),
     FOREIGN KEY (question_id) REFERENCES questions (id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE
-);
+)@@
 
 
-CREATE TABLE quiz_sessions (
+CREATE TABLE IF NOT EXISTS quiz_sessions (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id integer NOT NULL,
     started_at text NOT NULL,
@@ -57,21 +57,21 @@ CREATE TABLE quiz_sessions (
     CONSTRAINT quiz_sessions_score_nonnegative CHECK (score >= 0),
     CONSTRAINT quiz_sessions_current_question_nonnegative CHECK (current_question_position >= 0),
     FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE RESTRICT
-);
+)@@
 
-CREATE INDEX idx_sessions_user_status ON quiz_sessions (user_id, status);
+CREATE INDEX IF NOT EXISTS idx_sessions_user_status ON quiz_sessions (user_id, status)@@
 
-CREATE UNIQUE INDEX uq_one_active_session_per_user ON quiz_sessions(user_id) WHERE status = 'IN_PROGRESS';
+CREATE UNIQUE INDEX IF NOT EXISTS uq_one_active_session_per_user ON quiz_sessions(user_id) WHERE status = 'IN_PROGRESS'@@
 
 
-CREATE TRIGGER trg_sync_total_score_on_finish
+CREATE TRIGGER IF NOT EXISTS trg_sync_total_score_on_finish
     AFTER UPDATE OF status ON quiz_sessions
     WHEN NEW.status = 'FINISHED' AND OLD.status != 'FINISHED'
     BEGIN
         UPDATE users SET total_score = total_score + NEW.score WHERE id = NEW.user_id;
-    END;
+    END@@
 
-CREATE TABLE quiz_session_questions (
+CREATE TABLE IF NOT EXISTS quiz_session_questions (
     session_id integer NOT NULL,
     question_id integer NOT NULL,
     position integer NOT NULL,
@@ -80,12 +80,12 @@ CREATE TABLE quiz_session_questions (
     UNIQUE (session_id, position),
     FOREIGN KEY (session_id) REFERENCES quiz_sessions (id) ON DELETE CASCADE DEFERRABLE INITIALLY IMMEDIATE,
     FOREIGN KEY (question_id) REFERENCES questions (id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE
-);
+)@@
 
 -- answer_results не хранит снимок корректности выбранного варианта на момент ответа — на самом деле, это плохо,
 -- но сейчас нигде нет возможности редактировать question_answers.is_correct после создания вопроса.
 -- Когда появится администрирование надо будет поправить
-CREATE TABLE answer_results (
+CREATE TABLE IF NOT EXISTS answer_results (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     session_id integer NOT NULL,
     question_id integer NOT NULL,
@@ -94,5 +94,5 @@ CREATE TABLE answer_results (
     UNIQUE (session_id, question_id, selected_option_id),
     FOREIGN KEY (session_id, question_id) REFERENCES quiz_session_questions (session_id, question_id) ON DELETE CASCADE DEFERRABLE INITIALLY IMMEDIATE,
     FOREIGN KEY (question_id, selected_option_id) REFERENCES question_answers (question_id, id) ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE
-);
+)@@
 
