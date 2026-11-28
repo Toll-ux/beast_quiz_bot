@@ -1,0 +1,153 @@
+//SQLite-ориентированная схема проекта Beast Quiz Bot:
+//  1. Схема хранит данные, которые нужны пользователю и квиз-сессии.
+//  2. Текущий счёт рассчитывается на уровне application/domain.
+//  3. question_answers.position нужен для порядка вариантов и индексированных ответов API.
+//  4. quiz_session_questions нужна для состава и порядка случайно выбранных вопросов сессии.
+//
+//На что обратить внимание при работе с этой схемой:
+//  1. users.total_score денормализован (дублирует сумму quiz_sessions.score по FINISHED-сессиям
+//    этого пользователя). DBML не создаёт триггеры, поэтому синхронизация должна быть добавлена
+//    отдельно в реальной SQL-миграции:
+//      CREATE TRIGGER trg_sync_total_score_on_finish
+//      AFTER UPDATE OF status ON quiz_sessions
+//      WHEN NEW.status = 'FINISHED' AND OLD.status != 'FINISHED'
+//      BEGIN
+//          UPDATE users SET total_score = total_score + NEW.score WHERE id = NEW.user_id;
+//      END;
+//  2. Нельзя иметь две IN_PROGRESS сессии у одного user_id одновременно. DBML не умеет описывать
+//    частичные индексы, поэтому ограничение нужно создать отдельно в миграции:
+//      CREATE UNIQUE INDEX uq_one_active_session_per_user
+//      ON quiz_sessions(user_id) WHERE status = 'IN_PROGRESS';
+//  3. Минимум вариантов ответа и наличие хотя бы одного правильного варианта уже проверяется в
+//    домене (Question.java: answers и correctAnswerIndexes не могут быть пустыми при создании
+//    вопроса). Отдельный SQL-триггер на question_answers сознательно не добавлен: AFTER INSERT
+//    в SQLite видит только одну вставляемую строку за раз и не может надёжно проверить агрегат по
+//    всем вариантам вопроса без DEFERRED-констрейнтов (которых в SQLite нет). Когда появится
+//    настоящий репозиторий (замена HardcodedQuestionRepository), эквивалентную проверку нужно
+//    делать в репозитории/сервисе перед записью набора вариантов, а не триггером.
+//  4. У всех Ref в конце файла явно указано поведение delete:, чтобы оно было осознанным решением,
+//    а не умолчанием SQLite (NO ACTION). restrict — для ссылок на справочные/исторические данные
+//    (users, questions, question_answers), cascade — только для строк, которые принадлежат
+//    исключительно своей сессии (quiz_session_questions и answer_results по цепочке от
+//    quiz_sessions: удаление сессии должно убирать её собственные дочерние строки).
+//  5. У users и questions добавлен created_at для аудита и возможных tie-break правил лидерборда.
+//  6. answer_results не хранит снимок корректности выбранного варианта на момент ответа (см. Note
+//    на самой таблице) — осознанно не добавили колонку: сейчас нигде нет возможности редактировать
+//    question_answers.is_correct после создания вопроса (Question — неизменяемый record,
+//    у HardcodedQuestionRepository нет метода обновления). Если появится редактирование вопросов
+//    администратором, нужно будет добавить снимок (например, was_correct_option) и пересмотреть
+//    этот пункт.
+
+Table users {
+    id integer [pk, increment, not null, note: 'Внутренний SQLite-идентификатор пользователя. Используется во внешних ключах независимо от того, реальный ли аккаунт или фейковый.']
+    telegram_id integer [unique, note: 'Telegram ID реального пользователя. NULL у фейкового пользователя. В SQLite UNIQUE допускает несколько строк со значением NULL.']
+    username text [note: 'Имя пользователя Telegram с символом @. Может отсутствовать.']
+    nickname text [note: 'Отображаемое имя в таблице лидеров. Может отсутствовать у администратора или пользователя, который ещё не проходил квиз.']
+    role text [not null, default: 'NORMAL_PLAYER', note: 'Роль пользователя: ADMIN или NORMAL_PLAYER. Ограничение допустимых значений задаётся CHECK.']
+    total_score integer [not null, default: 0, note: 'Накопленный счёт пользователя. Основа для сортировки лидерборда. Денормализован: дублирует сумму quiz_sessions.score по FINISHED-сессиям этого пользователя, синхронизируется SQL-триггером из миграции (см. пункт 1 в начале файла) — приложению не стоит обновлять это поле напрямую мимо триггера.']
+    is_user_real integer [not null, default: 1, note: '1 для реального пользователя, 0 для фейкового/тестового пользователя. В SQLite булево значение хранится как 0 или 1.']
+    created_at text [not null, note: 'Время регистрации пользователя в формате ISO-8601. Нужно для аудита и возможных tie-break правил лидерборда (см. пункт 5 в начале файла).']
+
+    checks {
+        `role IN ('ADMIN', 'NORMAL_PLAYER')` [name: 'users_role_allowed']
+        `total_score >= 0` [name: 'users_total_score_nonnegative']
+        `is_user_real IN (0, 1)` [name: 'users_is_real_boolean']
+        `((is_user_real = 1 AND telegram_id IS NOT NULL AND telegram_id > 0) OR (is_user_real = 0 AND telegram_id IS NULL))` [name: 'users_real_telegram_id_consistency']
+    }
+
+    Note: 'У пользователя есть внутренний id, поэтому сессии и ответы не зависят напрямую от Telegram ID. Фейковые пользователи определяются is_user_real = 0.'
+}
+
+Table questions {
+    id integer [pk, increment, not null, note: 'Идентификатор вопроса.']
+    text text [not null, note: 'Текст вопроса, показываемый пользователю.']
+    created_at text [not null, note: 'Время создания вопроса в формате ISO-8601 (см. пункт 5 в начале файла).']
+
+    Note: 'Справочник вопросов. Каждому вопросу принадлежат варианты из question_answers.'
+}
+
+Table question_answers {
+    id integer [pk, increment, not null, note: 'Идентификатор конкретного варианта ответа.']
+    question_id integer [not null, note: 'Вопрос, которому принадлежит вариант.']
+    position integer [not null, note: 'Нулевой индекс варианта в ответах вопроса. Он нужен для сохранения порядка вариантов и для принятия индексов selectedAnswers из API.']
+    text text [not null, note: 'Текст варианта ответа.']
+    is_correct integer [not null, default: 0, note: '1, если вариант правильный, 0 в противном случае. Вопрос может иметь несколько правильных вариантов.']
+
+    indexes {
+        (question_id, position) [unique]
+        (question_id, id) [unique, note: 'Не несёт самостоятельного смысла (id уже глобально уникален) — существует только для того, чтобы answer_results.(question_id, selected_option_id) мог сослаться на составной индекс и тем самым проверить принадлежность выбранного варианта нужному вопросу.']
+    }
+
+    checks {
+        `position >= 0` [name: 'question_answers_position_nonnegative']
+        `is_correct IN (0, 1)` [name: 'question_answers_is_correct_boolean']
+}
+
+    Note: 'Справочник вариантов ответа (не выбранных ответов пользователя). Нужен для передачи вариантов пользователю и серверной проверки множественного выбора. Минимум вариантов и наличие хотя бы одного правильного ответа проверяется в домене при создании вопроса (Question.java), а не SQL-триггером — см. пункт 3 в начале файла.'
+}
+
+Table quiz_sessions {
+    id integer [pk, increment, not null, note: 'Уникальный идентификатор прохождения квиза.']
+    user_id integer [not null, note: 'Пользователь, проходящий квиз. Может ссылаться как на реального, так и на фейкового пользователя.']
+    started_at text [not null, note: 'Время начала сессии в формате ISO-8601. SQLite хранит datetime как текст.']
+    finished_at text [note: 'Время завершения или прерывания сессии в формате ISO-8601. NULL пока квиз активен.']
+    status text [not null, default: 'NOT_STARTED', note: 'Состояние квиза: NOT_STARTED, IN_PROGRESS, FINISHED или ABORTED.']
+    score integer [not null, default: 0, note: 'Набранные очки этой сессии. За каждый правильный ответ начисляется 10, за неправильный 0.']
+    current_question_position integer [not null, default: 0, note: 'Нулевой номер текущего вопроса в данной сессии. Нужен при перезапуске приложения или восстановления сессии, чтобы вернуть GET /api/current_question и продолжить с того же места.']
+
+    indexes {
+        (user_id, status)
+        // Ограничение "не более одной IN_PROGRESS сессии на user_id" выражается только через
+        // частичный UNIQUE INDEX, которого DBML не поддерживает — см. пункт 2 в начале файла,
+        // создаётся отдельно в SQL-миграции.
+    }
+
+    checks {
+        `status IN ('NOT_STARTED', 'IN_PROGRESS', 'FINISHED', 'ABORTED')` [name: 'quiz_sessions_status_allowed']
+        `score >= 0` [name: 'quiz_sessions_score_nonnegative']
+        `current_question_position >= 0` [name: 'quiz_sessions_current_question_nonnegative']
+    }
+
+    Note: 'Сохраняет состояние сессии и агрегированный счёт прохождения. Оно не дублируется в application: application читает и обновляет эти поля.'
+}
+
+Table quiz_session_questions {
+    session_id integer [not null, note: 'Квиз-сессия, для которой был выбран вопрос.']
+    question_id integer [not null, note: 'Вопрос из справочника, выданный этой сессии.']
+    position integer [not null, note: 'Порядок вопроса в конкретной сессии, начиная с нуля.']
+
+    indexes {
+        (session_id, question_id) [pk]
+        (session_id, position) [unique]
+    }
+
+    checks {
+        `position >= 0` [name: 'quiz_session_questions_position_nonnegative']
+    }
+
+    Note: 'Нужна для хранения состава случайно выбранных вопросов и их последовательности в сессии. Без неё база не восстановит один и тот же набор вопросов после перезапуска сервера.'
+}
+
+Table answer_results {
+    id integer [pk, increment, not null, note: 'Внутренний идентификатор выбранного варианта. При множественном ответе создаётся несколько строк.']
+    session_id integer [not null, note: 'Сессия, в которой дан ответ.']
+    question_id integer [not null, note: 'Вопрос этой сессии, который отвечал пользователь.']
+    selected_option_id integer [not null, note: 'ID выбранного варианта из question_answers, а не его индекс в API. Совместные ссылки проверяют принадлежность варианта данному вопросу и сессии.']
+    answered_at text [not null, note: 'Время выбора ответа в формате ISO-8601.']
+
+    indexes {
+        (session_id, question_id, selected_option_id) [unique, note: 'Нельзя выбрать один и тот же вариант дважды для одного вопроса в одной сессии.']
+    }
+
+    Note: 'Хранит выбранные пользователем варианты, а не агрегированный результат проверки. Для множественного выбора создаётся одна строка на каждый вариант. Не хранит снимок is_correct на момент ответа — осознанное решение, т.к. вопросы сейчас неизменяемы после создания (см. пункт 6 в начале файла); пересмотреть, если появится редактирование вопросов администратором.'
+}
+
+// Поведение delete: указано явно для каждого Ref (см. пункт 4 в начале файла):
+// restrict — для ссылок на справочные/исторические данные, cascade — только для строк,
+// принадлежащих исключительно своей сессии.
+Ref: quiz_sessions.user_id > users.id [delete: restrict]
+Ref: quiz_session_questions.session_id > quiz_sessions.id [delete: cascade]
+Ref: quiz_session_questions.question_id > questions.id [delete: restrict]
+Ref: question_answers.question_id > questions.id [delete: restrict]
+Ref: answer_results.(session_id, question_id) > quiz_session_questions.(session_id, question_id) [delete: cascade]
+Ref: answer_results.(question_id, selected_option_id) > question_answers.(question_id, id) [delete: restrict]
