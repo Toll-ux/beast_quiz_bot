@@ -1,7 +1,8 @@
 package client.dialog;
 
-import client.api.BackendRestClient;
+import client.api.QuizBackendClient;
 import client.api.dto.response.*;
+import org.springframework.web.client.HttpClientErrorException;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -9,7 +10,7 @@ import java.util.stream.Collectors;
 
 public class DialogHandler {
 
-    private final BackendRestClient backendRestClient;
+    private final QuizBackendClient quizBackendClient;
     private final long telegramId;
 
     /// При создании устанавливает состояние ожидания команды от пользователя
@@ -19,10 +20,10 @@ public class DialogHandler {
     private int currentQuestionAnswersCount;
 
     public DialogHandler(
-            BackendRestClient backendRestClient,
+            QuizBackendClient quizBackendClient,
             long telegramId
     ) {
-        this.backendRestClient = backendRestClient;
+        this.quizBackendClient = quizBackendClient;
         this.telegramId = telegramId;
     }
 
@@ -125,8 +126,16 @@ public class DialogHandler {
 
         /// На запрос о начале квиза приходит ответ, создан ли новый квиз или используется существующий незавершенный
         /// Пока никак не используется
-        StartQuizResponse startResponse =
-                backendRestClient.startQuiz(telegramId, questionCount);
+        StartQuizResponse startResponse;
+        try {
+            startResponse =
+                    quizBackendClient.startQuiz(telegramId, questionCount);
+        } catch (HttpClientErrorException e) {
+            return new DialogResponse(
+                    "An error occurred while starting the quiz. Please try again.",
+                    false
+            );
+        }
 
         /// Переход в режим ответа на вопрос - после удачного начала пользователю сразу показывают первый.
         state = DialogState.ANSWERING_QUESTION;
@@ -139,8 +148,15 @@ public class DialogHandler {
      * @return ответ с вопросом и вариантами ответов на него + просьбой ввести номера ответов.
      */
     private DialogResponse getCurrentQuestionMessage() {
-        GetCurrentQuestionViewResponse question =
-                backendRestClient.getCurrentQuestion(telegramId);
+        GetCurrentQuestionViewResponse question;
+        try {
+            question = quizBackendClient.getCurrentQuestion(telegramId);
+        } catch (HttpClientErrorException e) {
+            return new DialogResponse(
+                    "An error occurred while fetching the question. Please try again.",
+                    false
+            );
+        }
 
         currentQuestionId = question.questionId();
         currentQuestionAnswersCount = question.answers().size();
@@ -196,12 +212,19 @@ public class DialogHandler {
             );
         }
 
-        AnswerQuestionResponse result =
-                backendRestClient.answerQuestion(
-                        telegramId,
-                        (int) currentQuestionId,
-                        chosenAnswers
-                );
+        AnswerQuestionResponse result;
+        try {
+            result = quizBackendClient.answerQuestion(
+                    telegramId,
+                    (int) currentQuestionId,
+                    chosenAnswers
+            );
+        } catch (HttpClientErrorException e) {
+            return new DialogResponse(
+                    "An error occurred while submitting your answer. Please try again.",
+                    false
+            );
+        }
 
         /// Формирование текста результата ответа на вопрос
         StringBuilder message = new StringBuilder();
@@ -221,8 +244,15 @@ public class DialogHandler {
 
         /// Завершение квиза, если вопрос был последний
         if (result.finished()) {
-            FinishQuizResponse finishResult =
-                    backendRestClient.finishQuiz(telegramId);
+            FinishQuizResponse finishResult;
+            try {
+                finishResult = quizBackendClient.finishQuiz(telegramId);
+            } catch (HttpClientErrorException e) {
+                return new DialogResponse(
+                        "An error occurred while finishing the quiz. Please try again.",
+                        false
+                );
+            }
 
             state = DialogState.MAIN_MENU;
 
@@ -285,10 +315,11 @@ public class DialogHandler {
      * иначе ответ-сообщение с содержимым доски лидеров.
      */
     private DialogResponse showLeaderboard() {
-        GetLeaderboardResponse response =
-                backendRestClient.getLeaderboard(telegramId);
+        GetLeaderboardResponse response;
 
-        if (response.leaderboard().isEmpty()) {
+        try{
+            response = quizBackendClient.getLeaderboard(telegramId);
+        } catch (HttpClientErrorException e){
             return new DialogResponse(
                     "Apparently you can be first in our repository!",
                     false
